@@ -73,7 +73,7 @@ print(cadastro["razao_social"] if cadastro else "sem dado nesta consulta")
 
 Os erros vêm em JSON; o motivo está em `detail` (ou `message`).
 
-- `402`: o saldo não cobre a consulta (acabaram as consultas do mês, as 10 grátis de IE/CNPJ ou a franquia do plano, e não há recarga). Não repita: avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
+- `402`: o saldo não cobre a consulta. O motivo está em `detail`/`message`: ou a cota do mês acabou (as 10 grátis de IE/CNPJ ou a franquia do plano), ou a consulta não entra nas grátis (CND, IE nos 27 estados, CNPJ ao vivo, NF-e) e a conta não tem plano nem recarga. Não repita: repasse o motivo e avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
 - `403` com `API_KEY_ERROR`: chave ausente, inválida ou revogada. Não tente outra chave por conta própria.
 - `429`: passou do limite por minuto do plano (ou de outro limite descrito em `detail`/`message`, como consultas simultâneas). Espere o tempo de `Retry-After` (ou `retry_after` no corpo) antes de repetir; em lote, espace as chamadas pelo limite do plano.
 - `400`/`422`: parâmetro faltando ou inválido; corrija antes de repetir.

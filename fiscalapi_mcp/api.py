@@ -123,7 +123,7 @@ def _mensagem_de_erro(resposta: httpx.Response) -> str:
     corpo = _corpo(resposta)
     detalhe = _detalhe(corpo)
     if status == 402:
-        return textos.MSG_402
+        return textos.MSG_402.format(motivo=f" ({detalhe.rstrip('.')})" if detalhe else "")
     if status in (401, 403):
         if corpo.get("title") == "ACESSO_NEGADO" or corpo.get("error") == "ACESSO_NEGADO":
             return f"A chave não tem acesso a esta consulta ({detalhe or 'acesso negado'})."

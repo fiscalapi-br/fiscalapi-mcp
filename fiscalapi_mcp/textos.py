@@ -44,8 +44,8 @@ CUSTO_CNPJ = (
 CUSTO_NFE_SEM_CERT = (
     f"Custo: 3 consultas do saldo (2 no Enterprise): {_PRECO_NFE_SEM_CERT} por chave. "
     "Cobra o XML entregue e também a chave cuja nota não foi encontrada (nao_encontrado); a mesma chave "
-    "repetida logo depois de um nao_encontrado, chave inválida e erro não são cobrados. Não entra nas "
-    "consultas grátis."
+    "repetida logo depois de um nao_encontrado, chave inválida e erro não são cobrados. Precisa de plano ou "
+    "recarga."
 )
 
 LIMITES_DA_API = (
@@ -148,9 +148,12 @@ COBERTURA = {
     "limites": LIMITES_DA_API,
 }
 
+# {motivo} = o texto que a API mandou no 402 (cota do mês usada, com a data de
+# renovação, ou consulta que não entra nas grátis). Vazio, fica só o geral.
 MSG_402 = (
-    "O saldo não cobre esta consulta: acabaram as consultas do mês (as 10 grátis de IE/CNPJ ou a franquia do "
-    "plano) e não há recarga que pague. Assine ou recarregue em app.fiscalapi.com.br para continuar."
+    "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. Só IE de um estado e CNPJ entram nas "
+    "10 consultas grátis do mês; o resto precisa de plano ou recarga. Assine ou recarregue em "
+    "app.fiscalapi.com.br para continuar."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE
 MSG_5XX = (

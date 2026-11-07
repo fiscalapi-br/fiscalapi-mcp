@@ -145,8 +145,8 @@ async def test_402_vira_mensagem_clara(cliente, api_falsa, headers_do_cliente):
 
     assert resultado.is_error
     mensagem = texto(resultado)
-    assert "acabaram as consultas do mês" in mensagem.lower()
-    assert "10 grátis de IE/CNPJ" in mensagem
+    assert "Seu saldo não cobre esta consulta" in mensagem
+    assert "Só IE de um estado e CNPJ entram nas 10 consultas grátis" in mensagem
     assert "app.fiscalapi.com.br" in mensagem
     assert CHAVE not in mensagem
 
