@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.fiscalapi-br/fiscalapi-mcp",
+  "title": "FiscalAPI",
+  "description": "Inscrição Estadual (27 UFs), CNPJ, certidões estaduais e federais e XML de NF-e pela chave.",
+  "version": "0.1.0",
+  "websiteUrl": "https://fiscalapi.com.br",
+  "repository": {
+    "url": "https://github.com/fiscalapi-br/fiscalapi-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.fiscalapi.com.br/mcp",
+      "headers": [
+        {
+          "name": "X-API-Key",
+          "description": "Chave da FiscalAPI (app.fiscalapi.com.br). Sem ela, só validar_inscricao_estadual e cobertura funcionam.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
