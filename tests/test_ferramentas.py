@@ -116,8 +116,8 @@ async def test_bearer_vira_x_api_key(cliente, api_falsa, headers_do_cliente):
 
 
 async def test_x_api_key_tem_precedencia_sobre_bearer():
-    headers = {"X-API-Key": "da-x-api-key", "Authorization": "Bearer do-bearer"}
-    assert servidor.chave_dos_headers(headers) == "da-x-api-key"
+    headers = {"X-API-Key": "fapi_da_x_api_key_01", "Authorization": "Bearer fapi_do_bearer_000001"}
+    assert servidor.chave_dos_headers(headers) == "fapi_da_x_api_key_01"
 
 
 @pytest.mark.parametrize(
