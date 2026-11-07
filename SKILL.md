@@ -14,7 +14,6 @@ Documentação completa: https://docs.fiscalapi.com.br
 - Toda consulta abaixo, menos `/api/saldo`, cobra do saldo do usuário. Diga o custo e espere o OK dele antes da primeira chamada e antes de qualquer laço.
 - Preço de 1 consulta por plano (franquia; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
 - Conta que nunca assinou, com e-mail confirmado e sem recarga: 10 consultas grátis por mês de IE em um estado e de CNPJ (não valem para a IE em todos os estados nem para o CNPJ ao vivo).
-- Conta sem plano paga a recarga do último plano (R$ 0,12 se nunca assinou).
 - Consulta que termina em erro não é cobrada. Resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 - Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
 - Envie só um documento por chamada (`cpf`, `cnpj` ou `ie`), com ou sem pontuação.
