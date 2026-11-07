@@ -508,9 +508,15 @@ def hosts_permitidos() -> list[str]:
     """Host aceitos em /mcp (proteção contra DNS rebinding). O domínio público
     do Railway vem da variável que o próprio Railway injeta no serviço."""
     hosts = ["mcp.fiscalapi.com.br", "localhost", "127.0.0.1"]
-    railway = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip().lower()
-    if railway.endswith(".up.railway.app") and re.fullmatch(r"[a-z0-9.-]+", railway):
-        hosts.append(railway)
+    # Com domínio próprio cadastrado, o Railway passa a injetar o domínio
+    # próprio em RAILWAY_PUBLIC_DOMAIN; o *.up.railway.app vem em MCP_HOSTS_EXTRA
+    # (lista separada por vírgula) para não cair enquanto o DNS não aponta.
+    candidatos = [os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")]
+    candidatos += os.environ.get("MCP_HOSTS_EXTRA", "").split(",")
+    for host in candidatos:
+        host = host.strip().lower()
+        if host.endswith(".up.railway.app") and re.fullmatch(r"[a-z0-9.-]+", host) and host not in hosts:
+            hosts.append(host)
     return [h for host in hosts for h in (host, f"{host}:*")]
 
 
