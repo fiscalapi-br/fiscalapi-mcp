@@ -35,6 +35,7 @@ def api_falsa(monkeypatch: pytest.MonkeyPatch) -> ApiFalsa:
     monkeypatch.setattr(servidor, "cliente_api", ClienteFiscalAPI(transport=httpx.MockTransport(falsa)))
     monkeypatch.setattr(servidor, "TETO_PAGO", JanelaDeslizante(servidor.TETO_PAGAS_POR_HORA, 3600))
     monkeypatch.setattr(servidor, "LIMITE_SEM_CHAVE", JanelaDeslizante(servidor.LIMITE_SEM_CHAVE_POR_MINUTO, 60))
+    monkeypatch.setattr(servidor, "LIMITE_COM_CHAVE", JanelaDeslizante(servidor.LIMITE_COM_CHAVE_POR_MINUTO, 60))
     return falsa
 
 

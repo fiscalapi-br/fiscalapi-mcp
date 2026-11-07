@@ -1,6 +1,6 @@
 # FiscalAPI MCP
 
-Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, CND estadual, CNDT, CND Federal, CRF/FGTS e baixar o XML de NF-e pela chave de acesso, usando a sua conta da FiscalAPI.
+Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, CND estadual, CNDT, CND Federal, CRF/FGTS e baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital), usando a sua conta da FiscalAPI.
 
 **Endereço:** `https://mcp.fiscalapi.com.br/mcp` (Streamable HTTP)
 
@@ -65,18 +65,18 @@ Para não deixar a chave no histórico do terminal, guarde-a numa variável de a
 
 ### ChatGPT (modo desenvolvedor)
 
-Crie um conector com a URL `https://mcp.fiscalapi.com.br/mcp`, sem autenticação. O ChatGPT não envia header com chave de API, então por lá funcionam só as ferramentas sem chave (`validar_inscricao_estadual` e `cobertura`). Para as consultas pagas, use um cliente que envia o header, como os de cima.
+Crie um conector com a URL `https://mcp.fiscalapi.com.br/mcp`, sem autenticação. Os conectores do ChatGPT aceitam só OAuth ou nenhuma autenticação, não uma chave de API em header, então por lá funcionam só as ferramentas sem chave (`validar_inscricao_estadual` e `cobertura`). Para as consultas pagas, use um cliente que envia o header, como os de cima.
 
 ## Ferramentas
 
-Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02). Consulta que termina em erro não é cobrada.
+Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02). Conta sem plano paga a recarga do último plano (R$ 0,12 se nunca assinou). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 
 | Ferramenta | O que faz | Custo |
 |---|---|---|
 | `validar_inscricao_estadual` | Confere formato e dígito verificador da IE na UF. Não diz se a IE existe ou está ativa. | Sem chave, sem custo |
 | `cobertura` | O que a FiscalAPI consulta, por produto e UF, e os limites da API. | Sem chave, sem custo |
 | `consultar_ie` | Inscrição Estadual numa UF, por CPF, CNPJ ou IE (por CPF, todos os estados menos SP). | 1 consulta |
-| `consultar_ie_todos_estados` | Inscrições nos 27 estados numa chamada, por CPF, CNPJ ou IE. | 1 consulta |
+| `consultar_ie_todos_estados` | Inscrições nos 27 estados numa chamada, por CPF, CNPJ ou IE. | 1 consulta (fora das grátis) |
 | `consultar_cnpj` | Cadastro público do CNPJ na Receita Federal, com Simples e MEI. `ao_vivo=true` consulta na hora. | 1 consulta; ao vivo, 3 |
 | `consultar_cnd_estadual` | CND estadual (ICMS) de CPF ou CNPJ na UF. | 1 consulta |
 | `consultar_cndt` | Certidão Negativa de Débitos Trabalhistas. | 1 consulta |
@@ -85,19 +85,19 @@ Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parên
 | `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | 3 consultas (2 no Enterprise); mínimo R$ 0,05 |
 | `saldo` | Quanto o saldo ainda rende, em consultas e em notas. | Não consome consulta |
 
-As 10 consultas grátis por mês valem para IE e CNPJ (não para o CNPJ ao vivo), em conta que nunca assinou e com e-mail confirmado. O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada e não entra nas grátis.
+As 10 consultas grátis por mês valem para IE em um estado e CNPJ (não para a IE em todos os estados nem para o CNPJ ao vivo), em conta que nunca assinou, com e-mail confirmado e sem recarga. O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois) e não entra nas grátis.
 
-O PDF das certidões não volta pelo MCP (é grande demais para o modelo); ele vem no campo `pdf_base64` da [API REST](https://docs.fiscalapi.com.br).
+O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 
 ### Freios
 
 - Toda ferramenta que cobra tem o parâmetro `confirmo_custo`. Sem `confirmo_custo=true`, ela só explica o custo e não consulta nada. O agente deve mostrar o custo e esperar o seu OK.
-- Este servidor aceita até 30 consultas pagas por hora por chave. Para volume, use a API REST direto.
+- Este servidor aceita até 30 consultas pagas por hora por chave (chave recusada pela API não conta). Para volume, use a API REST direto.
 - Valem também os limites da sua conta: por minuto, Lite 5, Starter 20, Pro 60 e Enterprise 120 consultas; XML de NF-e sem certificado, 2 consultas simultâneas.
 
 ## Segurança
 
-- A chave só é repassada à API da FiscalAPI (`https://api.fiscalapi.com.br`) no header `X-API-Key`, a cada chamada. O servidor não tem banco de dados, não registra headers e não guarda a chave: para contar o teto por hora, mantém em memória só um hash (SHA-256) dela, por até 1 hora.
+- A chave só é repassada à API da FiscalAPI (`https://api.fiscalapi.com.br`) no header `X-API-Key`, a cada chamada. O servidor não tem banco de dados, não registra headers e não guarda a chave: para contar o teto por hora, mantém em memória só um hash (SHA-256) dela, descartado depois que a janela de 1 hora passa (ou quando a chave é recusada pela API).
 - O servidor só fala com `api.fiscalapi.com.br`; os caminhos são fixos no código e o que você informa vai como parâmetro.
 - O código está aqui, com licença MIT.
 

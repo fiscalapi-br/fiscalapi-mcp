@@ -6,6 +6,7 @@ caminho nem no host. A chave vai SÓ no header X-API-Key e nunca é logada.
 """
 
 import logging
+import re
 from typing import Any
 
 import httpx
@@ -20,6 +21,8 @@ TIMEOUT_S = 80.0
 # Resposta maior que isso não cabe no contexto de um modelo de qualquer jeito.
 MAX_BYTES_RESPOSTA = 5 * 1024 * 1024
 _MAX_DETALHE = 300
+# CPF, CNPJ, IE e chave de NF-e que a API ecoa no erro não vão para o log nem para o modelo.
+_DOCUMENTO = re.compile(r"[0-9A-Za-z./-]*\d{4,}[0-9A-Za-z./-]*")
 
 CAMINHOS = {
     "consultar_ie": ("GET", "/api/consultar"),
@@ -36,6 +39,10 @@ CAMINHOS = {
 
 class ErroDaAPI(Exception):
     """Falha já traduzida para uma mensagem em português, segura para o modelo ler."""
+
+    def __init__(self, mensagem: str, status: int | None = None) -> None:
+        super().__init__(mensagem)
+        self.status = status
 
 
 class ClienteFiscalAPI:
@@ -71,7 +78,7 @@ class ClienteFiscalAPI:
 
         logger.info("api operacao=%s status=%s", operacao, resposta.status_code)
         if resposta.status_code >= 400:
-            raise ErroDaAPI(_mensagem_de_erro(resposta))
+            raise ErroDaAPI(_mensagem_de_erro(resposta), status=resposta.status_code)
         if len(resposta.content) > MAX_BYTES_RESPOSTA:
             raise ErroDaAPI("A resposta da FiscalAPI veio grande demais para devolver por aqui. Use a API REST.")
         try:
@@ -100,7 +107,7 @@ def _detalhe(corpo: dict[str, Any]) -> str:
         detalhe = "; ".join(p for p in partes if p)
     if not isinstance(detalhe, str):
         return ""
-    return detalhe.strip()[:_MAX_DETALHE]
+    return _DOCUMENTO.sub("[documento]", detalhe.strip())[:_MAX_DETALHE]
 
 
 def _segundos(valor: Any) -> int | None:
@@ -124,7 +131,8 @@ def _mensagem_de_erro(resposta: httpx.Response) -> str:
     if status == 429:
         espera = _segundos(resposta.headers.get("retry-after") or corpo.get("retry_after"))
         quando = f" Espere {espera} s e tente de novo." if espera else " Espere um pouco e tente de novo."
-        return "A FiscalAPI limitou as chamadas desta conta (limite por minuto do plano)." + quando
+        motivo = detalhe or "limite de consultas por minuto do plano"
+        return f"A FiscalAPI limitou as chamadas desta conta ({motivo})." + quando
     if status in (400, 422):
         motivo = f": {detalhe}" if detalhe else "."
         return f"A FiscalAPI recusou os parâmetros{motivo} Corrija e tente de novo."

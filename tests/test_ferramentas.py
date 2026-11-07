@@ -128,6 +128,8 @@ async def test_x_api_key_tem_precedencia_sobre_bearer():
         {"Authorization": "Bearer "},
         {"X-API-Key": "tem espaco"},
         {"X-API-Key": "x" * 300},
+        {"X-API-Key": "fapi_chave_com_acentuação"},
+        {"X-API-Key": "curta"},
     ],
 )
 async def test_chave_ausente_ou_malformada_vira_none(headers):
@@ -247,3 +249,40 @@ async def test_saldo_nao_pede_confirmo_custo(cliente, api_falsa, headers_do_clie
     [requisicao] = api_falsa.requisicoes
     assert requisicao.url.path == "/api/saldo"
     assert requisicao.headers["x-api-key"] == CHAVE
+
+
+async def test_chave_recusada_nao_ocupa_o_teto(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+    api_falsa.status = 403
+    api_falsa.corpo = {"title": "API_KEY_ERROR", "detail": "Invalid API key", "status": 403}
+
+    for _ in range(servidor.TETO_PAGAS_POR_HORA + 1):
+        resultado = await cliente.call_tool("consultar_cndt", {"cnpj": "12345678000195", "confirmo_custo": True})
+        assert "recusou a chave" in texto(resultado)
+
+    assert len(api_falsa.requisicoes) == servidor.TETO_PAGAS_POR_HORA + 1
+
+
+async def test_erro_da_api_nao_ecoa_documento(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+    api_falsa.status = 400
+    api_falsa.corpo = {"title": "DOCUMENTO_INVALIDO", "detail": "Documento inválido: 12345678909", "status": 400}
+
+    resultado = await cliente.call_tool("consultar_cndt", {"cpf": "12345678909", "confirmo_custo": True})
+
+    assert resultado.is_error
+    assert "12345678909" not in texto(resultado)
+    assert "Documento inválido" in texto(resultado)
+
+
+async def test_429_traz_o_motivo_e_a_espera(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+    api_falsa.status = 429
+    api_falsa.corpo = {"error": "RATE_LIMIT_EXCEEDED", "message": "Limite de requisicoes do plano excedido."}
+    api_falsa.headers = {"Retry-After": "12"}
+
+    resultado = await cliente.call_tool("consultar_cnpj", {"cnpj": "12345678000195", "confirmo_custo": True})
+
+    assert resultado.is_error
+    assert "Limite de requisicoes do plano excedido." in texto(resultado)
+    assert "12 s" in texto(resultado)

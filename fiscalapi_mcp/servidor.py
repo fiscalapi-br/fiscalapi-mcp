@@ -25,8 +25,11 @@ from fiscalapi_mcp.api import ClienteFiscalAPI, ErroDaAPI
 from fiscalapi_mcp.limites import JanelaDeslizante, hash_da_chave
 
 # A chave viaja em header: nenhum logger de HTTP pode registrar requisição em detalhe.
-for _nome in ("httpx", "httpcore", "httpx2"):
+for _nome in ("httpx", "httpcore", "httpx2", "httpcore2"):
     logging.getLogger(_nome).setLevel(logging.WARNING)
+# O SDK loga cada ToolError em INFO com a mensagem; as nossas já vêm sem chave e
+# com documentos mascarados, mas o log da ferramenta abaixo basta.
+logging.getLogger("mcp.server.mcpserver.server").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +38,19 @@ URL_DOCUMENTACAO = "https://github.com/fiscalapi-br/fiscalapi-mcp#readme"
 
 TETO_PAGAS_POR_HORA = 30
 LIMITE_SEM_CHAVE_POR_MINUTO = 60
+# Todas as chamadas com chave somadas: impede usar este servidor como repetidor.
+LIMITE_COM_CHAVE_POR_MINUTO = 120
 
 # Módulo-nível de propósito: os testes trocam por versões com transporte falso
 # ou janelas novas.
 cliente_api = ClienteFiscalAPI()
 TETO_PAGO = JanelaDeslizante(TETO_PAGAS_POR_HORA, 3600)
 LIMITE_SEM_CHAVE = JanelaDeslizante(LIMITE_SEM_CHAVE_POR_MINUTO, 60)
+LIMITE_COM_CHAVE = JanelaDeslizante(LIMITE_COM_CHAVE_POR_MINUTO, 60)
 
-_MAX_CHAVE = 256
+# As chaves da FiscalAPI são `fapi_` + hexadecimal; aqui só se exige texto ASCII
+# simples, sem espaço nem nada que possa virar outro header.
+_FORMATO_CHAVE = re.compile(r"[A-Za-z0-9_-]{16,128}")
 _NAO_ALFANUMERICO = re.compile(r"[^0-9A-Za-z]")
 
 UF = Literal[
@@ -87,7 +95,7 @@ INSTRUCOES = (
 mcp = MCPServer(
     "fiscalapi",
     title="FiscalAPI",
-    description="Inscrição Estadual, CNPJ, certidões e XML de NF-e pela API da FiscalAPI.",
+    description="Inscrição Estadual, CNPJ, certidões e cópia para leitura do XML de NF-e, pela API da FiscalAPI.",
     instructions=INSTRUCOES,
     website_url="https://fiscalapi.com.br",
     version=__version__,
@@ -134,8 +142,8 @@ def _headers_da_requisicao(ctx: Context) -> Mapping[str, str]:
 def chave_dos_headers(headers: Mapping[str, str]) -> str | None:
     """A chave da FiscalAPI vinda do cliente MCP: X-API-Key ou Authorization: Bearer.
 
-    Valor com espaço, caractere de controle ou comprido demais é descartado (nunca
-    vai para outro header). Nada daqui é logado.
+    Valor fora do formato (espaço, acento, caractere de controle, curto ou comprido
+    demais) é descartado: nunca vai para outro header. Nada daqui é logado.
     """
     normalizados = {str(k).lower(): str(v) for k, v in headers.items()}
     valor = normalizados.get("x-api-key", "").strip()
@@ -143,9 +151,7 @@ def chave_dos_headers(headers: Mapping[str, str]) -> str | None:
         esquema, _, token = normalizados.get("authorization", "").strip().partition(" ")
         if esquema.lower() == "bearer":
             valor = token.strip()
-    if not valor or len(valor) > _MAX_CHAVE:
-        return None
-    if any(c.isspace() or not c.isprintable() for c in valor):
+    if not _FORMATO_CHAVE.fullmatch(valor):
         return None
     return valor
 
@@ -193,8 +199,8 @@ def _sem_pdf(dados: Any) -> Any:
         if campo == "pdf_base64" and isinstance(valor, str) and valor:
             saida[campo] = ""
             saida["pdf_omitido"] = (
-                "O PDF não vem pelo MCP (grande demais para o modelo). Ele está no campo pdf_base64 da "
-                "mesma consulta na API REST."
+                "O PDF não vem pelo MCP (grande demais para o modelo). Na API REST ele vem no campo "
+                "pdf_base64, mas repetir a consulta lá cobra de novo."
             )
         else:
             saida[campo] = _sem_pdf(valor)
@@ -218,19 +224,33 @@ async def _consulta_paga(
             f"Consulta paga, nada foi consultado. {custo} Mostre o custo ao usuário e, só se ele aceitar, "
             "chame de novo com confirmo_custo=true."
         )
-    espera = TETO_PAGO.tentar(hash_da_chave(chave))
+    identificador = hash_da_chave(chave)
+    espera = TETO_PAGO.tentar(identificador)
     if espera:
         minutos = max(1, math.ceil(espera / 60))
         raise ToolError(
             f"Este servidor MCP aceita até {TETO_PAGAS_POR_HORA} consultas pagas por hora por chave. "
             f"Tente de novo em {minutos} min. Para volume, use a API REST direto."
         )
+    try:
+        return _sem_pdf(await _chamar_api(operacao, chave, params=params, corpo=corpo))
+    except ToolError as erro:
+        # Chave recusada não ocupa o teto de ninguém (e não deixa o hash guardado).
+        if getattr(erro.__cause__, "status", None) in (401, 403):
+            TETO_PAGO.desfazer(identificador)
+        raise
+
+
+async def _chamar_api(
+    operacao: str, chave: str, params: dict[str, Any] | None = None, corpo: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    if LIMITE_COM_CHAVE.tentar("global"):
+        raise ToolError("Muitas chamadas neste servidor agora. Tente de novo em 1 minuto.")
     logger.info("ferramenta=%s", operacao)
     try:
-        dados = await cliente_api.chamar(operacao, chave, params=params, corpo=corpo)
+        return await cliente_api.chamar(operacao, chave, params=params, corpo=corpo)
     except ErroDaAPI as erro:
-        raise ToolError(str(erro)) from None
-    return _sem_pdf(dados)
+        raise ToolError(str(erro)) from erro
 
 
 def _limite_sem_chave() -> None:
@@ -313,8 +333,7 @@ async def consultar_ie(
     description=(
         "Procura inscrições estaduais nos 27 estados numa chamada, por CPF, CNPJ ou IE (um só), sem informar "
         "a UF. Devolve, por UF, as inscrições encontradas e o campo complete (false = algum estado não "
-        "respondeu, então ausência não prova que não existe inscrição). Conta como 1 consulta. "
-        + textos.CUSTO_CONSULTA_GRATIS
+        "respondeu, então ausência não prova que não existe inscrição). Conta como 1 consulta. " + textos.CUSTO_IE_TODOS
     ),
 )
 async def consultar_ie_todos_estados(
@@ -328,9 +347,7 @@ async def consultar_ie_todos_estados(
     params: dict[str, Any] = dict(_um_documento(cpf=cpf, cnpj=cnpj, ie=ie))
     if secundarias:
         params["secundarias"] = "true"
-    return await _consulta_paga(
-        ctx, "consultar_ie_todos_estados", textos.CUSTO_CONSULTA_GRATIS, confirmo_custo, params=params
-    )
+    return await _consulta_paga(ctx, "consultar_ie_todos_estados", textos.CUSTO_IE_TODOS, confirmo_custo, params=params)
 
 
 @mcp.tool(
@@ -459,15 +476,12 @@ async def baixar_xml_nfe_sem_certificado(
     title="Saldo da conta",
     description=(
         "Quanto o saldo da conta ainda rende: consultas_restantes (IE, CNPJ, certidões) e notas_restantes "
-        "(XML de NF-e). As duas formas dividem o mesmo saldo. Usa a chave da FiscalAPI e não consome consulta."
+        "(XML de NF-e). As duas formas dividem o mesmo saldo. notas_restantes conta o XML com certificado; "
+        "no Enterprise o XML sem certificado gasta o dobro. Usa a chave da FiscalAPI e não consome consulta."
     ),
 )
 async def saldo(ctx: Context) -> dict[str, Any]:
-    chave = _chave_ou_erro(ctx)
-    try:
-        return await cliente_api.chamar("saldo", chave)
-    except ErroDaAPI as erro:
-        raise ToolError(str(erro)) from None
+    return await _chamar_api("saldo", _chave_ou_erro(ctx))
 
 
 # --- rotas HTTP fora do MCP ------------------------------------------------

@@ -13,8 +13,9 @@ Documentação completa: https://docs.fiscalapi.com.br
 
 - Toda consulta abaixo, menos `/api/saldo`, cobra do saldo do usuário. Diga o custo e espere o OK dele antes da primeira chamada e antes de qualquer laço.
 - Preço de 1 consulta por plano (franquia; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
-- Conta que nunca assinou, com e-mail confirmado: 10 consultas grátis de IE/CNPJ por mês (não vale para o CNPJ ao vivo).
-- Consulta que termina em erro não é cobrada.
+- Conta que nunca assinou, com e-mail confirmado e sem recarga: 10 consultas grátis por mês de IE em um estado e de CNPJ (não valem para a IE em todos os estados nem para o CNPJ ao vivo).
+- Conta sem plano paga a recarga do último plano (R$ 0,12 se nunca assinou).
+- Consulta que termina em erro não é cobrada. Resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 - Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
 - Envie só um documento por chamada (`cpf`, `cnpj` ou `ie`), com ou sem pontuação.
 
@@ -65,16 +66,17 @@ resposta = httpx.get(
     timeout=90,
 )
 resposta.raise_for_status()
-print(resposta.json()["result"]["razao_social"])
+cadastro = resposta.json().get("result")  # None quando a consulta não trouxe dado
+print(cadastro["razao_social"] if cadastro else "sem dado nesta consulta")
 ```
 
 ## Erros
 
 Os erros vêm em JSON; o motivo está em `detail` (ou `message`).
 
-- `402`: acabaram as consultas do mês (as 10 grátis de IE/CNPJ ou a franquia do plano). Não repita: avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
+- `402`: o saldo não cobre a consulta (acabaram as consultas do mês, as 10 grátis de IE/CNPJ ou a franquia do plano, e não há recarga). Não repita: avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
 - `403` com `API_KEY_ERROR`: chave ausente, inválida ou revogada. Não tente outra chave por conta própria.
-- `429`: passou do limite por minuto do plano. Espere o tempo de `Retry-After` (ou `retry_after` no corpo) antes de repetir; em lote, espace as chamadas pelo limite do plano.
+- `429`: passou do limite por minuto do plano (ou de outro limite descrito em `detail`/`message`, como consultas simultâneas). Espere o tempo de `Retry-After` (ou `retry_after` no corpo) antes de repetir; em lote, espace as chamadas pelo limite do plano.
 - `400`/`422`: parâmetro faltando ou inválido; corrija antes de repetir.
 - `5xx`: falha momentânea, não cobrada. Uma nova tentativa depois de alguns segundos é razoável; não fique em laço.
 

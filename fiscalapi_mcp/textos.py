@@ -26,19 +26,27 @@ _PRECO_NFE_SEM_CERT = (
     "Lite R$ 2,01; Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,05"
 )
 
-_SO_COBRA_COM_DADO = "Só é cobrada quando devolve dado: erro não é cobrado."
-_GRATIS_IE_CNPJ = "Conta que nunca assinou, com e-mail confirmado, tem 10 consultas grátis de IE/CNPJ por mês."
+_COBRANCA = (
+    "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como "
+    "consulta. Conta sem plano paga o preço da recarga do último plano (R$ 0,12 se nunca assinou)."
+)
+_GRATIS_IE_CNPJ = (
+    "Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês de IE "
+    "em um estado e de CNPJ."
+)
 
-CUSTO_CONSULTA = f"Custo: 1 consulta do saldo ({_PRECO_1}). {_SO_COBRA_COM_DADO}"
+CUSTO_CONSULTA = f"Custo: 1 consulta do saldo ({_PRECO_1}). {_COBRANCA}"
 CUSTO_CONSULTA_GRATIS = f"{CUSTO_CONSULTA} {_GRATIS_IE_CNPJ}"
+CUSTO_IE_TODOS = f"{CUSTO_CONSULTA} Não entra nas consultas grátis: exige plano ou recarga."
 CUSTO_CNPJ = (
     f"Custo: 1 consulta do saldo ({_PRECO_1}); com ao_vivo=true, 3 consultas ({_PRECO_3}). "
-    f"{_SO_COBRA_COM_DADO} {_GRATIS_IE_CNPJ} A consulta ao vivo não entra nas grátis."
+    f"{_COBRANCA} {_GRATIS_IE_CNPJ} A consulta ao vivo não entra nas grátis."
 )
 CUSTO_NFE_SEM_CERT = (
     f"Custo: 3 consultas do saldo (2 no Enterprise): {_PRECO_NFE_SEM_CERT} por chave. "
-    "Cobra o XML entregue e também a chave cuja nota não foi encontrada (nao_encontrado); "
-    "chave inválida e erro não são cobrados. Não entra nas consultas grátis."
+    "Cobra o XML entregue e também a chave cuja nota não foi encontrada (nao_encontrado); a mesma chave "
+    "repetida logo depois de um nao_encontrado, chave inválida e erro não são cobrados. Não entra nas "
+    "consultas grátis."
 )
 
 LIMITES_DA_API = (
@@ -88,7 +96,8 @@ COBERTURA = {
         ),
         "observacoes": [
             "Por CPF em todos os estados menos SP, que busca só por CNPJ ou IE.",
-            "consultar_ie_todos_estados procura nos 27 estados numa chamada e conta como 1 consulta.",
+            "consultar_ie_todos_estados procura nos 27 estados numa chamada e conta como 1 consulta "
+            "(não entra nas grátis).",
         ],
     },
     "cnpj": {
@@ -141,8 +150,8 @@ COBERTURA = {
 }
 
 MSG_402 = (
-    "Acabaram as consultas do mês (as 10 grátis de IE/CNPJ ou a franquia do plano). "
-    "Assine ou recarregue em app.fiscalapi.com.br para continuar."
+    "O saldo não cobre esta consulta: acabaram as consultas do mês (as 10 grátis de IE/CNPJ ou a franquia do "
+    "plano) e não há recarga que pague. Assine ou recarregue em app.fiscalapi.com.br para continuar."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE
 MSG_5XX = (
