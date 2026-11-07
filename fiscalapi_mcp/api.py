@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 URL_BASE = "https://api.fiscalapi.com.br"
 USER_AGENT = f"fiscalapi-mcp/{__version__}"
-TIMEOUT_S = 80.0
+TIMEOUT_S = 95.0
 # Resposta maior que isso não cabe no contexto de um modelo de qualquer jeito.
 MAX_BYTES_RESPOSTA = 5 * 1024 * 1024
 _MAX_DETALHE = 300

@@ -63,7 +63,7 @@ resposta = httpx.get(
     "https://api.fiscalapi.com.br/api/consultar-cnpj",
     params={"cnpj": "12345678000195"},
     headers={"X-API-Key": os.environ["FISCALAPI_API_KEY"]},
-    timeout=90,
+    timeout=95,
 )
 resposta.raise_for_status()
 cadastro = resposta.json().get("result")  # None quando a consulta não trouxe dado

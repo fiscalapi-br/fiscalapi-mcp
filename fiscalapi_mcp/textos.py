@@ -159,7 +159,7 @@ MSG_5XX = (
     "Erro não é cobrado; tente de novo em alguns minutos."
 )
 MSG_TIMEOUT = (
-    "A consulta passou de 80 segundos sem resposta. Se a FiscalAPI concluir depois, ela pode ser cobrada: "
+    "A consulta passou de 95 segundos sem resposta. Se a FiscalAPI concluir depois, ela pode ser cobrada: "
     "confira o saldo (ferramenta saldo) antes de repetir."
 )
 MSG_REDE = "Não foi possível falar com a FiscalAPI agora. Tente de novo em alguns minutos."
