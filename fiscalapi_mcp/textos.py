@@ -27,8 +27,7 @@ _PRECO_NFE_SEM_CERT = (
 )
 
 _COBRANCA = (
-    "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como "
-    "consulta."
+    "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
 )
 _GRATIS_IE_CNPJ = (
     "Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês de IE "
