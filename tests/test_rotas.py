@@ -41,3 +41,12 @@ def test_hosts_permitidos_inclui_dominio_do_railway(monkeypatch):
 def test_hosts_permitidos_ignora_dominio_estranho(monkeypatch):
     monkeypatch.setenv("RAILWAY_PUBLIC_DOMAIN", "evil.example.com")
     assert "evil.example.com" not in servidor.hosts_permitidos()
+
+
+def test_hosts_extra_mantem_o_dominio_do_railway_com_dominio_proprio(monkeypatch):
+    monkeypatch.setenv("RAILWAY_PUBLIC_DOMAIN", "mcp.fiscalapi.com.br")
+    monkeypatch.setenv("MCP_HOSTS_EXTRA", "mcp-production-e9f89.up.railway.app, evil.example.com")
+    hosts = servidor.hosts_permitidos()
+    assert "mcp-production-e9f89.up.railway.app" in hosts
+    assert "evil.example.com" not in hosts
+    assert hosts.count("mcp.fiscalapi.com.br") == 1
