@@ -84,8 +84,8 @@ UF = Literal[
 ]
 
 INSTRUCOES = (
-    "Servidor MCP da FiscalAPI: Inscrição Estadual (27 UFs), CNPJ, CND estadual, CNDT, CND Federal, "
-    "CRF/FGTS e XML de NF-e sem certificado (cópia para leitura, sem a assinatura digital). "
+    "Servidor MCP da FiscalAPI: Inscrição Estadual (27 UFs), CNPJ, Simples Nacional, NFS-e, CND estadual, CNDT, "
+    "CND Federal, CRF/FGTS e XML de NF-e sem certificado (cópia para leitura, sem a assinatura digital). "
     "validar_inscricao_estadual e cobertura não precisam de chave nem cobram. As demais usam a chave da "
     "FiscalAPI do usuário (header X-API-Key ou Authorization: Bearer) e as de consulta cobram do saldo dele: "
     "antes de chamá-las, diga ao usuário o custo que está na descrição da ferramenta e só passe "
@@ -470,6 +470,45 @@ async def baixar_xml_nfe_sem_certificado(
     return await _consulta_paga(
         ctx, "baixar_xml_nfe_sem_certificado", textos.CUSTO_NFE_SEM_CERT, confirmo_custo, corpo={"chave": chave_nfe}
     )
+
+
+@mcp.tool(
+    title="Consultar Simples Nacional",
+    description=(
+        "Consulta a situação de um CNPJ no Simples Nacional (com a data da opção), no SIMEI e nos regimes "
+        "regulares de IBS e CBS, com os eventos futuros. Para filiais, a situação é a da matriz. "
+        + textos.CUSTO_SIMPLES
+    ),
+)
+async def consultar_simples_nacional(
+    ctx: Context,
+    cnpj: Annotated[str, Field(description="CNPJ, com ou sem pontuação.", max_length=24)],
+    confirmo_custo: CampoConfirmo = False,
+) -> dict[str, Any]:
+    params: dict[str, Any] = dict(_um_documento(cnpj=cnpj))
+    return await _consulta_paga(ctx, "consultar_simples_nacional", textos.CUSTO_SIMPLES, confirmo_custo, params=params)
+
+
+@mcp.tool(
+    title="Consultar NFS-e por chave",
+    description=(
+        "Consulta UMA NFS-e do padrão nacional pela chave de acesso de 50 dígitos, sem certificado digital: "
+        "emitente, tomador, serviço, tributação municipal e federal e situação de geração (situacao não "
+        "indica cancelamento). Uma consulta nova leva de 30 a 60 segundos. O PDF do DANFSe não vem por aqui. "
+        + textos.CUSTO_NFSE
+    ),
+)
+async def consultar_nfse(
+    ctx: Context,
+    chave: Annotated[
+        str, Field(description="Chave de acesso da NFS-e (50 dígitos); separadores são ignorados.", max_length=70)
+    ],
+    confirmo_custo: CampoConfirmo = False,
+) -> dict[str, Any]:
+    chave_nfse = _limpo(chave)
+    if not chave_nfse or len(chave_nfse) != 50 or not chave_nfse.isdigit():
+        raise ToolError("A chave de acesso da NFS-e tem 50 dígitos. Confira e tente de novo.")
+    return await _consulta_paga(ctx, "consultar_nfse", textos.CUSTO_NFSE, confirmo_custo, params={"chave": chave_nfse})
 
 
 @mcp.tool(

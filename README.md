@@ -1,6 +1,6 @@
 # FiscalAPI MCP
 
-Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, CND estadual, CNDT, CND Federal, CRF/FGTS e baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital), usando a sua conta da FiscalAPI.
+Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, Simples Nacional, NFS-e por chave, CND estadual, CNDT, CND Federal, CRF/FGTS e baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital), usando a sua conta da FiscalAPI.
 
 **Endereço:** `https://mcp.fiscalapi.com.br/mcp` (Streamable HTTP)
 
@@ -78,6 +78,8 @@ Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parên
 | `consultar_ie` | Inscrição Estadual numa UF, por CPF, CNPJ ou IE (por CPF, todos os estados menos SP). | 1 consulta |
 | `consultar_ie_todos_estados` | Inscrições nos 27 estados numa chamada, por CPF, CNPJ ou IE. | 1 consulta (fora das grátis) |
 | `consultar_cnpj` | Cadastro público do CNPJ na Receita Federal, com Simples e MEI. `ao_vivo=true` consulta na hora. | 1 consulta; ao vivo, 3 |
+| `consultar_simples_nacional` | Situação do CNPJ no Simples Nacional, SIMEI e regimes IBS/CBS. | 1 consulta (fora das grátis) |
+| `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | 3 consultas (2 no Enterprise); mínimo R$ 0,05; só a nota entregue (fora das grátis) |
 | `consultar_cnd_estadual` | CND estadual (ICMS) de CPF ou CNPJ na UF. | 1 consulta |
 | `consultar_cndt` | Certidão Negativa de Débitos Trabalhistas. | 1 consulta |
 | `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União. | 1 consulta |

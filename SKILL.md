@@ -1,6 +1,6 @@
 ---
 name: fiscalapi
-description: Use para consultar dados fiscais brasileiros pela API REST da FiscalAPI (api.fiscalapi.com.br) — Inscrição Estadual nos 27 estados por CPF, CNPJ ou IE, cadastro de CNPJ, CND estadual, CNDT, CND Federal, CRF/FGTS, XML de NF-e pela chave de acesso e saldo da conta. Cada consulta cobra do saldo do usuário; confirme o custo antes.
+description: Use para consultar dados fiscais brasileiros pela API REST da FiscalAPI (api.fiscalapi.com.br) — Inscrição Estadual nos 27 estados por CPF, CNPJ ou IE, cadastro de CNPJ, Simples Nacional, NFS-e pela chave, CND estadual, CNDT, CND Federal, CRF/FGTS, XML de NF-e pela chave de acesso e saldo da conta. Cada consulta cobra do saldo do usuário; confirme o custo antes.
 ---
 
 # FiscalAPI pela API REST
@@ -25,6 +25,8 @@ Documentação completa: https://docs.fiscalapi.com.br
 | `GET /api/consultar` | `uf` + `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições estaduais na UF (por CPF, todas menos SP) | 1 consulta |
 | `GET /api/consultar-ie-todos` | `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições nos 27 estados, por UF; `complete=false` se algum estado não respondeu | 1 consulta |
 | `GET /api/consultar-cnpj` | `cnpj`; `force_fresh=true` opcional (ao vivo) | Cadastro público na Receita Federal, com Simples e MEI | 1 consulta; ao vivo, 3 |
+| `GET /api/consultar-simples-nacional` | `cnpj` | Situação no Simples Nacional, SIMEI e regimes IBS/CBS | 1 consulta (fora das grátis) |
+| `GET /api/consultar-nfse` | `chave` (50 dígitos); `danfse=true` opcional (PDF em `danfse_pdf_base64`) | NFS-e do padrão nacional, sem certificado; 30 a 60 s | 3 consultas (2 no Enterprise); só a nota entregue |
 | `GET /api/consultar-cnd` | `uf` + `cpf` ou `cnpj` | CND estadual: status, emissão, validade, PDF em `pdf_base64` | 1 consulta |
 | `GET /api/consultar-cndt` | `cpf` ou `cnpj` | CNDT (débitos trabalhistas) | 1 consulta |
 | `GET /api/consultar-cnd-federal` | `cpf` ou `cnpj`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
