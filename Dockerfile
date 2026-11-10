@@ -1,5 +1,5 @@
 # Dependências instaladas do uv.lock (versões e hashes travados), sem as de desenvolvimento.
-FROM python:3.12.12-slim AS dependencias
+FROM python:3.15.0-slim AS dependencias
 COPY --from=ghcr.io/astral-sh/uv:0.9.22 /uv /bin/uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-FROM python:3.12.12-slim
+FROM python:3.15.0-slim
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app
 COPY --from=dependencias /app/.venv /app/.venv
