@@ -11,6 +11,8 @@ PAGAS = {
     "consultar_ie",
     "consultar_ie_todos_estados",
     "consultar_cnpj",
+    "consultar_simples_nacional",
+    "consultar_nfse",
     "consultar_cnd_estadual",
     "consultar_cndt",
     "consultar_cnd_federal",
@@ -286,3 +288,53 @@ async def test_429_traz_o_motivo_e_a_espera(cliente, api_falsa, headers_do_clien
     assert resultado.is_error
     assert "Limite de requisicoes do plano excedido." in texto(resultado)
     assert "12 s" in texto(resultado)
+
+
+CHAVE_NFSE = "35503082211222333000181000000000012326100000045676"
+
+
+async def test_simples_nacional_chama_a_rota_com_cnpj_limpo(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+    api_falsa.corpo = {"request_id": "r1", "cnpj": "11222333000181", "optante_simples": True}
+
+    resultado = await cliente.call_tool(
+        "consultar_simples_nacional", {"cnpj": "11.222.333/0001-81", "confirmo_custo": True}
+    )
+
+    assert not resultado.is_error
+    assert dados(resultado)["optante_simples"] is True
+    [requisicao] = api_falsa.requisicoes
+    assert requisicao.url.path == "/api/consultar-simples-nacional"
+    assert dict(requisicao.url.params) == {"cnpj": "11222333000181"}
+
+
+async def test_simples_nacional_sem_confirmo_custo_nao_chama_a_api(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+
+    resultado = await cliente.call_tool("consultar_simples_nacional", {"cnpj": "11222333000181"})
+
+    assert resultado.is_error
+    assert api_falsa.requisicoes == []
+
+
+async def test_nfse_chama_a_rota_com_a_chave_so_em_digitos(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+    api_falsa.corpo = {"request_id": "r1", "chave": CHAVE_NFSE, "cached": False}
+
+    com_espaco = CHAVE_NFSE[:25] + " " + CHAVE_NFSE[25:]
+    resultado = await cliente.call_tool("consultar_nfse", {"chave": com_espaco, "confirmo_custo": True})
+
+    assert not resultado.is_error
+    [requisicao] = api_falsa.requisicoes
+    assert requisicao.url.path == "/api/consultar-nfse"
+    assert dict(requisicao.url.params) == {"chave": CHAVE_NFSE}
+
+
+async def test_nfse_chave_com_tamanho_errado_nao_chama_a_api(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+
+    resultado = await cliente.call_tool("consultar_nfse", {"chave": "1" * 44, "confirmo_custo": True})
+
+    assert resultado.is_error
+    assert "50 dígitos" in texto(resultado)
+    assert api_falsa.requisicoes == []

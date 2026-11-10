@@ -48,6 +48,16 @@ CUSTO_NFE_SEM_CERT = (
     "recarga."
 )
 
+CUSTO_SIMPLES = (
+    f"Custo: 1 consulta do saldo ({_PRECO_1}). Erro não é cobrado. Não entra nas consultas grátis: exige "
+    "plano ou recarga."
+)
+CUSTO_NFSE = (
+    f"Custo: 3 consultas do saldo (2 no Enterprise): {_PRECO_NFE_SEM_CERT} por chave. Cobra só a NFS-e "
+    "entregue; chave inválida, nota não encontrada e erro não são cobrados. Não entra nas consultas grátis: "
+    "exige plano ou recarga."
+)
+
 LIMITES_DA_API = (
     "Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 consultas "
     "(conta sem plano: 5). XML de NF-e sem certificado: até 2 consultas simultâneas por conta."
@@ -119,6 +129,22 @@ COBERTURA = {
             "e protocolo."
         ),
         "observacoes": ["Alguns estados respondem nao_contribuinte quando o documento não tem inscrição lá."],
+    },
+    "simples_nacional": {
+        "ferramentas": ["consultar_simples_nacional"],
+        "busca_por": ["CNPJ"],
+        "o_que_devolve": (
+            "Situação do CNPJ no Simples Nacional (com a data da opção), no SIMEI e nos regimes regulares "
+            "de IBS e CBS, com eventos futuros. Para filiais, a situação é a da matriz."
+        ),
+    },
+    "nfse_por_chave": {
+        "ferramentas": ["consultar_nfse"],
+        "o_que_devolve": (
+            "NFS-e do padrão nacional pela chave de acesso de 50 dígitos, sem certificado: emitente, tomador, "
+            "serviço, tributação municipal e federal e situação de geração. Uma consulta nova leva de 30 a 60 "
+            "segundos. O PDF do DANFSe não vem pelo MCP; está na API REST (danfse=true)."
+        ),
     },
     "certidoes_federais": {
         "ferramentas": ["consultar_cndt", "consultar_cnd_federal", "consultar_crf_fgts"],

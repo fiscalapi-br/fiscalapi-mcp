@@ -32,6 +32,8 @@ CAMINHOS = {
     "consultar_cndt": ("GET", "/api/consultar-cndt"),
     "consultar_cnd_federal": ("GET", "/api/consultar-cnd-federal"),
     "consultar_crf_fgts": ("GET", "/api/consultar-crf-fgts"),
+    "consultar_simples_nacional": ("GET", "/api/consultar-simples-nacional"),
+    "consultar_nfse": ("GET", "/api/consultar-nfse"),
     "baixar_xml_nfe_sem_certificado": ("POST", "/api/consultar-nfe-xml-sem-certificado"),
     "saldo": ("GET", "/api/saldo"),
 }
