@@ -6,7 +6,7 @@ Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi
 
 Duas ferramentas funcionam sem chave e não cobram nada: `validar_inscricao_estadual` e `cobertura`. As outras usam a sua chave da FiscalAPI e cobram do saldo da conta, como a API REST.
 
-Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) (10 consultas grátis de IE/CNPJ por mês).
+Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) (10 consultas grátis por mês).
 
 ## Configurar
 
@@ -78,16 +78,16 @@ Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parên
 | `consultar_ie` | Inscrição Estadual numa UF, por CPF, CNPJ ou IE (por CPF, todos os estados menos SP). | 1 consulta |
 | `consultar_ie_todos_estados` | Inscrições nos 27 estados numa chamada, por CPF, CNPJ ou IE. | 1 consulta (fora das grátis) |
 | `consultar_cnpj` | Cadastro público do CNPJ na Receita Federal, com Simples e MEI. `ao_vivo=true` consulta na hora. | 1 consulta; ao vivo, 3 |
-| `consultar_simples_nacional` | Situação do CNPJ no Simples Nacional, SIMEI e regimes IBS/CBS. | 1 consulta (fora das grátis) |
-| `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | 3 consultas (2 no Enterprise); mínimo R$ 0,05; só a nota entregue (fora das grátis) |
+| `consultar_simples_nacional` | Situação do CNPJ no Simples Nacional, SIMEI e regimes IBS/CBS. | 1 consulta |
+| `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | 3 consultas (2 no Enterprise); mínimo R$ 0,05; só a nota entregue |
 | `consultar_cnd_estadual` | CND estadual (ICMS) de CPF ou CNPJ na UF. | 1 consulta |
 | `consultar_cndt` | Certidão Negativa de Débitos Trabalhistas. | 1 consulta |
 | `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União. | 1 consulta |
 | `consultar_crf_fgts` | Certificado de Regularidade do FGTS. | 1 consulta |
-| `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | 3 consultas (2 no Enterprise); mínimo R$ 0,05 |
+| `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | 3 consultas (2 no Enterprise); mínimo R$ 0,05 (fora das grátis) |
 | `saldo` | Quanto o saldo ainda rende, em consultas e em notas. | Não consome consulta |
 
-As 10 consultas grátis por mês valem para IE em um estado e CNPJ (não para a IE em todos os estados nem para o CNPJ ao vivo), em conta que nunca assinou, com e-mail confirmado e sem recarga. O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois) e não entra nas grátis.
+Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês em qualquer consulta avulsa (IE em um estado, CNPJ inclusive ao vivo, Simples Nacional, NFS-e, CND estadual, CNDT, CND Federal e CRF/FGTS), somadas com as do painel. Cada consulta entregue gasta 1 das 10, mesmo as que custam 3 num plano; erro não gasta. Ficam fora a IE em todos os estados e o XML de NF-e sem certificado. As grátis acabam na primeira assinatura e não voltam depois de cancelar. O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois) e não entra nas grátis.
 
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 

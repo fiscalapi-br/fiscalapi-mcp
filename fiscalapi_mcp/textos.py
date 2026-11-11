@@ -4,9 +4,7 @@ Valores conferidos no backend da FiscalAPI em 07/11/2026 (tabela de preços por
 plano e custo em consultas de cada tipo). Mudou o preço lá, muda aqui.
 """
 
-CHAMADA_PARA_CHAVE = (
-    "Para consultar dados reais: crie a chave em app.fiscalapi.com.br (10 consultas grátis de IE/CNPJ por mês)"
-)
+CHAMADA_PARA_CHAVE = "Para consultar dados reais: crie a chave em app.fiscalapi.com.br (10 consultas grátis por mês)"
 
 COMO_CONFIGURAR_CHAVE = (
     "Configure no cliente MCP o header X-API-Key: <sua chave> "
@@ -29,17 +27,16 @@ _PRECO_NFE_SEM_CERT = (
 _COBRANCA = (
     "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
 )
-_GRATIS_IE_CNPJ = (
-    "Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês de IE "
-    "em um estado e de CNPJ."
+_GRATIS = (
+    "Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês, somadas "
+    "com as do painel; cada consulta entregue gasta 1 das 10."
 )
 
 CUSTO_CONSULTA = f"Custo: 1 consulta do saldo ({_PRECO_1}). {_COBRANCA}"
-CUSTO_CONSULTA_GRATIS = f"{CUSTO_CONSULTA} {_GRATIS_IE_CNPJ}"
+CUSTO_CONSULTA_GRATIS = f"{CUSTO_CONSULTA} {_GRATIS}"
 CUSTO_IE_TODOS = f"{CUSTO_CONSULTA} Não entra nas consultas grátis: exige plano ou recarga."
 CUSTO_CNPJ = (
-    f"Custo: 1 consulta do saldo ({_PRECO_1}); com ao_vivo=true, 3 consultas ({_PRECO_3}). "
-    f"{_COBRANCA} {_GRATIS_IE_CNPJ} A consulta ao vivo não entra nas grátis."
+    f"Custo: 1 consulta do saldo ({_PRECO_1}); com ao_vivo=true, 3 consultas ({_PRECO_3}). {_COBRANCA} {_GRATIS}"
 )
 CUSTO_NFE_SEM_CERT = (
     f"Custo: 3 consultas do saldo (2 no Enterprise): {_PRECO_NFE_SEM_CERT} por chave. "
@@ -48,14 +45,10 @@ CUSTO_NFE_SEM_CERT = (
     "recarga."
 )
 
-CUSTO_SIMPLES = (
-    f"Custo: 1 consulta do saldo ({_PRECO_1}). Erro não é cobrado. Não entra nas consultas grátis: exige "
-    "plano ou recarga."
-)
+CUSTO_SIMPLES = f"Custo: 1 consulta do saldo ({_PRECO_1}). Erro não é cobrado. {_GRATIS}"
 CUSTO_NFSE = (
     f"Custo: 3 consultas do saldo (2 no Enterprise): {_PRECO_NFE_SEM_CERT} por chave. Cobra só a NFS-e "
-    "entregue; chave inválida, nota não encontrada e erro não são cobrados. Não entra nas consultas grátis: "
-    "exige plano ou recarga."
+    f"entregue; chave inválida, nota não encontrada e erro não são cobrados. {_GRATIS}"
 )
 
 LIMITES_DA_API = (
@@ -177,9 +170,10 @@ COBERTURA = {
 # {motivo} = o texto que a API mandou no 402 (cota do mês usada, com a data de
 # renovação, ou consulta que não entra nas grátis). Vazio, fica só o geral.
 MSG_402 = (
-    "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. Só IE de um estado e CNPJ entram nas "
-    "10 consultas grátis do mês; o resto precisa de plano ou recarga. Assine ou recarregue em "
-    "app.fiscalapi.com.br para continuar."
+    "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. As 10 consultas grátis do mês valem "
+    "para qualquer consulta avulsa, menos a IE em todos os estados e o XML de NF-e sem certificado; depois "
+    "delas, ou fora delas, é preciso plano ou recarga. Assine ou recarregue em app.fiscalapi.com.br para "
+    "continuar."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE
 MSG_5XX = (
