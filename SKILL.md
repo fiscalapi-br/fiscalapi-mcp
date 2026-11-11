@@ -13,7 +13,7 @@ Documentação completa: https://docs.fiscalapi.com.br
 
 - Toda consulta abaixo, menos `/api/saldo`, cobra do saldo do usuário. Diga o custo e espere o OK dele antes da primeira chamada e antes de qualquer laço.
 - Preço de 1 consulta por plano (franquia; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
-- Conta que nunca assinou, com e-mail confirmado e sem recarga: 10 consultas grátis por mês de IE em um estado e de CNPJ (não valem para a IE em todos os estados nem para o CNPJ ao vivo).
+- Conta que nunca assinou, com e-mail confirmado e sem recarga: 10 consultas grátis por mês em qualquer consulta avulsa (inclusive CNPJ ao vivo, Simples Nacional, NFS-e e certidões), somadas com as do painel. Cada consulta entregue gasta 1 das 10, mesmo as que custam 3 num plano. Ficam fora a IE em todos os estados (`/api/consultar-ie-todos`) e o XML de NF-e sem certificado. À parte, 10 XML de NF-e com certificado por mês.
 - Consulta que termina em erro não é cobrada. Resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 - Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
 - Envie só um documento por chamada (`cpf`, `cnpj` ou `ie`), com ou sem pontuação.
@@ -23,15 +23,15 @@ Documentação completa: https://docs.fiscalapi.com.br
 | Método e caminho | Parâmetros | Devolve | Custo |
 |---|---|---|---|
 | `GET /api/consultar` | `uf` + `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições estaduais na UF (por CPF, todas menos SP) | 1 consulta |
-| `GET /api/consultar-ie-todos` | `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições nos 27 estados, por UF; `complete=false` se algum estado não respondeu | 1 consulta |
+| `GET /api/consultar-ie-todos` | `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições nos 27 estados, por UF; `complete=false` se algum estado não respondeu | 1 consulta (fora das grátis) |
 | `GET /api/consultar-cnpj` | `cnpj`; `force_fresh=true` opcional (ao vivo) | Cadastro público na Receita Federal, com Simples e MEI | 1 consulta; ao vivo, 3 |
-| `GET /api/consultar-simples-nacional` | `cnpj` | Situação no Simples Nacional, SIMEI e regimes IBS/CBS | 1 consulta (fora das grátis) |
+| `GET /api/consultar-simples-nacional` | `cnpj` | Situação no Simples Nacional, SIMEI e regimes IBS/CBS | 1 consulta |
 | `GET /api/consultar-nfse` | `chave` (50 dígitos); `danfse=true` opcional (PDF em `danfse_pdf_base64`) | NFS-e do padrão nacional, sem certificado; 30 a 60 s | 3 consultas (2 no Enterprise); só a nota entregue |
 | `GET /api/consultar-cnd` | `uf` + `cpf` ou `cnpj` | CND estadual: status, emissão, validade, PDF em `pdf_base64` | 1 consulta |
 | `GET /api/consultar-cndt` | `cpf` ou `cnpj` | CNDT (débitos trabalhistas) | 1 consulta |
 | `GET /api/consultar-cnd-federal` | `cpf` ou `cnpj`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
 | `GET /api/consultar-crf-fgts` | `cpf` ou `cnpj` | Certificado de Regularidade do FGTS | 1 consulta |
-| `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | 3 consultas (2 no Enterprise); cobra também `nao_encontrado` |
+| `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | 3 consultas (2 no Enterprise); cobra também `nao_encontrado` (fora das grátis) |
 | `GET /api/saldo` | — | `consultas_restantes` e `notas_restantes` | Não consome |
 
 Status da CND/certidão: `negativa`, `positiva`, `positiva_com_efeitos_de_negativa`, `nao_contribuinte`, `sem_certidao` (não há certidão emitida; não é erro) ou `erro`.
@@ -75,7 +75,7 @@ print(cadastro["razao_social"] if cadastro else "sem dado nesta consulta")
 
 Os erros vêm em JSON; o motivo está em `detail` (ou `message`).
 
-- `402`: o saldo não cobre a consulta. O motivo está em `detail`/`message`: ou a cota do mês acabou (as 10 grátis de IE/CNPJ ou a franquia do plano), ou a consulta não entra nas grátis (CND, IE nos 27 estados, CNPJ ao vivo, NF-e) e a conta não tem plano nem recarga. Não repita: repasse o motivo e avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
+- `402`: o saldo não cobre a consulta. O motivo está em `detail`/`message`: ou a cota do mês acabou (as 10 grátis ou a franquia do plano), ou a consulta não entra nas grátis (IE nos 27 estados, XML de NF-e sem certificado) e a conta não tem plano nem recarga. Quando acabam as 10 grátis, o corpo traz `free_queries_used` e `free_queries_limit`. Não repita: repasse o motivo e avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
 - `403` com `API_KEY_ERROR`: chave ausente, inválida ou revogada. Não tente outra chave por conta própria.
 - `429`: passou do limite por minuto do plano (ou de outro limite descrito em `detail`/`message`, como consultas simultâneas). Espere o tempo de `Retry-After` (ou `retry_after` no corpo) antes de repetir; em lote, espace as chamadas pelo limite do plano.
 - `400`/`422`: parâmetro faltando ou inválido; corrija antes de repetir.

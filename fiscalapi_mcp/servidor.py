@@ -378,7 +378,7 @@ async def consultar_cnpj(
     description=(
         "Consulta a Certidão Negativa de Débitos estadual (ICMS) de um CPF ou CNPJ (um só) na UF informada. "
         "Devolve o status (negativa, positiva, positiva_com_efeitos_de_negativa, nao_contribuinte, "
-        "sem_certidao ou erro), emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA
+        "sem_certidao ou erro), emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA_GRATIS
     ),
 )
 async def consultar_cnd_estadual(
@@ -389,14 +389,16 @@ async def consultar_cnd_estadual(
     confirmo_custo: CampoConfirmo = False,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {"uf": uf, **_um_documento(cpf=cpf, cnpj=cnpj)}
-    return await _consulta_paga(ctx, "consultar_cnd_estadual", textos.CUSTO_CONSULTA, confirmo_custo, params=params)
+    return await _consulta_paga(
+        ctx, "consultar_cnd_estadual", textos.CUSTO_CONSULTA_GRATIS, confirmo_custo, params=params
+    )
 
 
 @mcp.tool(
     title="Consultar CNDT (débitos trabalhistas)",
     description=(
         "Consulta a Certidão Negativa de Débitos Trabalhistas (TST) de um CPF ou CNPJ (um só). Devolve status, "
-        "emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA
+        "emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA_GRATIS
     ),
 )
 async def consultar_cndt(
@@ -406,7 +408,7 @@ async def consultar_cndt(
     confirmo_custo: CampoConfirmo = False,
 ) -> dict[str, Any]:
     params = _um_documento(cpf=cpf, cnpj=cnpj)
-    return await _consulta_paga(ctx, "consultar_cndt", textos.CUSTO_CONSULTA, confirmo_custo, params=params)
+    return await _consulta_paga(ctx, "consultar_cndt", textos.CUSTO_CONSULTA_GRATIS, confirmo_custo, params=params)
 
 
 @mcp.tool(
@@ -415,7 +417,7 @@ async def consultar_cndt(
         "Consulta a certidão de débitos de tributos federais e Dívida Ativa da União (Receita Federal e PGFN) "
         "de um CPF ou CNPJ (um só). Se já existe certidão que vale por mais de 3 dias, devolve essa "
         "(modo=consulta); senão, emite uma nova (modo=emissao). Com emitir_nova=true, emite sempre. Devolve "
-        "status, emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA
+        "status, emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA_GRATIS
     ),
 )
 async def consultar_cnd_federal(
@@ -428,14 +430,16 @@ async def consultar_cnd_federal(
     params: dict[str, Any] = dict(_um_documento(cpf=cpf, cnpj=cnpj))
     if emitir_nova:
         params["emitir_nova"] = "true"
-    return await _consulta_paga(ctx, "consultar_cnd_federal", textos.CUSTO_CONSULTA, confirmo_custo, params=params)
+    return await _consulta_paga(
+        ctx, "consultar_cnd_federal", textos.CUSTO_CONSULTA_GRATIS, confirmo_custo, params=params
+    )
 
 
 @mcp.tool(
     title="Consultar CRF/FGTS",
     description=(
         "Consulta o Certificado de Regularidade do FGTS (Caixa) de um CPF ou CNPJ (um só). Devolve status, "
-        "emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA
+        "emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA_GRATIS
     ),
 )
 async def consultar_crf_fgts(
@@ -445,7 +449,7 @@ async def consultar_crf_fgts(
     confirmo_custo: CampoConfirmo = False,
 ) -> dict[str, Any]:
     params = _um_documento(cpf=cpf, cnpj=cnpj)
-    return await _consulta_paga(ctx, "consultar_crf_fgts", textos.CUSTO_CONSULTA, confirmo_custo, params=params)
+    return await _consulta_paga(ctx, "consultar_crf_fgts", textos.CUSTO_CONSULTA_GRATIS, confirmo_custo, params=params)
 
 
 @mcp.tool(
