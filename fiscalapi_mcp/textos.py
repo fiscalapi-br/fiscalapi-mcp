@@ -30,9 +30,7 @@ _PRECO_NFE_SEM_CERT = (
 _COBRANCA = (
     "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
 )
-_GRATIS = (
-    "Exige plano ou recarga: as 10 consultas grátis do mês são só no painel, não valem pelo MCP."
-)
+_GRATIS = "Exige plano ou recarga: as 10 consultas grátis do mês são só no painel, não valem pelo MCP."
 
 CUSTO_CONSULTA = f"Custo: 1 consulta do saldo ({_PRECO_1}). {_COBRANCA}"
 CUSTO_CONSULTA_GRATIS = f"{CUSTO_CONSULTA} {_GRATIS}"
