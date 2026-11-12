@@ -4,7 +4,10 @@ Valores conferidos no backend da FiscalAPI em 07/11/2026 (tabela de preços por
 plano e custo em consultas de cada tipo). Mudou o preço lá, muda aqui.
 """
 
-CHAMADA_PARA_CHAVE = "Para consultar dados reais: crie a chave em app.fiscalapi.com.br (10 consultas grátis por mês)"
+CHAMADA_PARA_CHAVE = (
+    "Para consultar dados reais: crie a chave em app.fiscalapi.com.br e tenha plano ou recarga "
+    "(planos a partir de R$ 19,99/mês)"
+)
 
 COMO_CONFIGURAR_CHAVE = (
     "Configure no cliente MCP o header X-API-Key: <sua chave> "
@@ -27,14 +30,11 @@ _PRECO_NFE_SEM_CERT = (
 _COBRANCA = (
     "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
 )
-_GRATIS = (
-    "Conta que nunca assinou, com e-mail confirmado e sem recarga, tem 10 consultas grátis por mês, somadas "
-    "com as do painel; cada consulta entregue gasta 1 das 10."
-)
+_GRATIS = "Exige plano ou recarga: as 10 consultas grátis do mês são só no painel, não valem pelo MCP."
 
 CUSTO_CONSULTA = f"Custo: 1 consulta do saldo ({_PRECO_1}). {_COBRANCA}"
 CUSTO_CONSULTA_GRATIS = f"{CUSTO_CONSULTA} {_GRATIS}"
-CUSTO_IE_TODOS = f"{CUSTO_CONSULTA} Não entra nas consultas grátis: exige plano ou recarga."
+CUSTO_IE_TODOS = f"{CUSTO_CONSULTA} Exige plano ou recarga."
 CUSTO_CNPJ = (
     f"Custo: 1 consulta do saldo ({_PRECO_1}); com ao_vivo=true, 3 consultas ({_PRECO_3}). {_COBRANCA} {_GRATIS}"
 )
@@ -98,8 +98,7 @@ COBERTURA = {
         ),
         "observacoes": [
             "Por CPF em todos os estados menos SP, que busca só por CNPJ ou IE.",
-            "consultar_ie_todos_estados procura nos 27 estados numa chamada e conta como 1 consulta "
-            "(não entra nas grátis).",
+            "consultar_ie_todos_estados procura nos 27 estados numa chamada e conta como 1 consulta.",
         ],
     },
     "cnpj": {
@@ -168,11 +167,10 @@ COBERTURA = {
 }
 
 # {motivo} = o texto que a API mandou no 402 (cota do mês usada, com a data de
-# renovação, ou consulta que não entra nas grátis). Vazio, fica só o geral.
+# renovação, ou conta sem plano nem saldo). Vazio, fica só o geral.
 MSG_402 = (
-    "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. As 10 consultas grátis do mês valem "
-    "para qualquer consulta avulsa, menos a IE em todos os estados e o XML de NF-e sem certificado; depois "
-    "delas, ou fora delas, é preciso plano ou recarga. Assine ou recarregue em app.fiscalapi.com.br para "
+    "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. Pelo MCP e pela API, toda consulta pede "
+    "plano ou recarga (planos a partir de R$ 19,99/mês). Assine ou recarregue em app.fiscalapi.com.br para "
     "continuar."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE
