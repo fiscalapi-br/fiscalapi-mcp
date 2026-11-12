@@ -46,7 +46,7 @@ async def test_validar_ie_valida(cliente, api_falsa):
     corpo = dados(resultado)
     assert corpo["valida"] is True
     assert corpo["formatada"] == "110.042.490.114"
-    assert "10 consultas grátis" in corpo["proximo_passo"]
+    assert "plano ou recarga" in corpo["proximo_passo"]
     assert api_falsa.requisicoes == []
 
 
@@ -148,7 +148,7 @@ async def test_402_vira_mensagem_clara(cliente, api_falsa, headers_do_cliente):
     assert resultado.is_error
     mensagem = texto(resultado)
     assert "Seu saldo não cobre esta consulta" in mensagem
-    assert "As 10 consultas grátis do mês valem para qualquer consulta avulsa" in mensagem
+    assert "toda consulta pede plano ou recarga" in mensagem
     assert "app.fiscalapi.com.br" in mensagem
     assert CHAVE not in mensagem
 
