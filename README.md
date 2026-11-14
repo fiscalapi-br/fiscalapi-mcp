@@ -6,7 +6,7 @@ Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi
 
 Duas ferramentas funcionam sem chave e não cobram nada: `validar_inscricao_estadual` e `cobertura`. As outras usam a sua chave da FiscalAPI e cobram do saldo da conta, como a API REST.
 
-Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) e tenha plano ou recarga (planos a partir de R$ 19,99/mês).
+Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) e tenha plano ou recarga (planos a partir de R$ 50 por mês).
 
 ## Configurar
 
@@ -69,7 +69,7 @@ Crie um conector com a URL `https://mcp.fiscalapi.com.br/mcp`, sem autenticaçã
 
 ## Ferramentas
 
-Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
+Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 
 | Ferramenta | O que faz | Custo |
 |---|---|---|
@@ -87,7 +87,7 @@ Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parên
 | `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | 3 consultas (2 no Enterprise); mínimo R$ 0,05 |
 | `saldo` | Quanto o saldo ainda rende, em consultas e em notas. | Não consome consulta |
 
-Pelo MCP toda consulta pede plano ou recarga, a partir de R$ 19,99/mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
+Pelo MCP toda consulta pede plano ou recarga, a partir de R$ 50 por mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
 
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 
@@ -95,7 +95,7 @@ O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [A
 
 - Toda ferramenta que cobra tem o parâmetro `confirmo_custo`. Sem `confirmo_custo=true`, ela só explica o custo e não consulta nada. O agente deve mostrar o custo e esperar o seu OK.
 - Este servidor aceita até 30 consultas pagas por hora por chave (chave recusada pela API não conta). Para volume, use a API REST direto.
-- Valem também os limites da sua conta: por minuto, Lite 5, Starter 20, Pro 60 e Enterprise 120 consultas; XML de NF-e sem certificado, 2 consultas simultâneas.
+- Valem também os limites da sua conta: por minuto, Starter 20, Pro 60 e Enterprise 120 consultas; XML de NF-e sem certificado, 2 consultas simultâneas.
 
 ## Segurança
 
