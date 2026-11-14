@@ -15,17 +15,9 @@ COMO_CONFIGURAR_CHAVE = (
 )
 
 # Preço de UMA consulta do saldo, por plano (franquia do plano; recarga entre parênteses).
-_PRECO_1 = (
-    "Starter R$ 0,10 (recarga R$ 0,12); Pro R$ 0,065 (recarga R$ 0,07); "
-    "Enterprise R$ 0,025 (recarga R$ 0,02)"
-)
-_PRECO_3 = (
-    "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); "
-    "Enterprise R$ 0,075 (recarga R$ 0,06)"
-)
-_PRECO_NFE_SEM_CERT = (
-    "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,05"
-)
+_PRECO_1 = "Starter R$ 0,10 (recarga R$ 0,12); Pro R$ 0,065 (recarga R$ 0,07); Enterprise R$ 0,025 (recarga R$ 0,02)"
+_PRECO_3 = "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,075 (recarga R$ 0,06)"
+_PRECO_NFE_SEM_CERT = "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,05"
 
 _COBRANCA = (
     "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
