@@ -1,12 +1,12 @@
 """Textos fixos: custos, cobertura e mensagens.
 
-Valores conferidos no backend da FiscalAPI em 07/11/2026 (tabela de preços por
+Valores conferidos no backend da FiscalAPI em 14/11/2026 (tabela de preços por
 plano e custo em consultas de cada tipo). Mudou o preço lá, muda aqui.
 """
 
 CHAMADA_PARA_CHAVE = (
     "Para consultar dados reais: crie a chave em app.fiscalapi.com.br e tenha plano ou recarga "
-    "(planos a partir de R$ 19,99/mês)"
+    "(planos a partir de R$ 50 por mês)"
 )
 
 COMO_CONFIGURAR_CHAVE = (
@@ -15,17 +15,9 @@ COMO_CONFIGURAR_CHAVE = (
 )
 
 # Preço de UMA consulta do saldo, por plano (franquia do plano; recarga entre parênteses).
-_PRECO_1 = (
-    "Lite R$ 0,67; Starter R$ 0,10 (recarga R$ 0,12); Pro R$ 0,065 (recarga R$ 0,07); "
-    "Enterprise R$ 0,025 (recarga R$ 0,02)"
-)
-_PRECO_3 = (
-    "Lite R$ 2,01; Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); "
-    "Enterprise R$ 0,075 (recarga R$ 0,06)"
-)
-_PRECO_NFE_SEM_CERT = (
-    "Lite R$ 2,01; Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,05"
-)
+_PRECO_1 = "Starter R$ 0,10 (recarga R$ 0,12); Pro R$ 0,065 (recarga R$ 0,07); Enterprise R$ 0,025 (recarga R$ 0,02)"
+_PRECO_3 = "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,075 (recarga R$ 0,06)"
+_PRECO_NFE_SEM_CERT = "Starter R$ 0,30 (recarga R$ 0,36); Pro R$ 0,195 (recarga R$ 0,21); Enterprise R$ 0,05"
 
 _COBRANCA = (
     "Erro não é cobrado. Resposta sem inscrição encontrada, sem_certidao ou nao_contribuinte conta como consulta."
@@ -52,7 +44,7 @@ CUSTO_NFSE = (
 )
 
 LIMITES_DA_API = (
-    "Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 consultas "
+    "Limite por minuto da conta: Starter 20, Pro 60, Enterprise 120 consultas "
     "(conta sem plano: 5). XML de NF-e sem certificado: até 2 consultas simultâneas por conta."
 )
 
@@ -170,7 +162,7 @@ COBERTURA = {
 # renovação, ou conta sem plano nem saldo). Vazio, fica só o geral.
 MSG_402 = (
     "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. Pelo MCP e pela API, toda consulta pede "
-    "plano ou recarga (planos a partir de R$ 19,99/mês). Assine ou recarregue em app.fiscalapi.com.br para "
+    "plano ou recarga (planos a partir de R$ 50 por mês). Assine ou recarregue em app.fiscalapi.com.br para "
     "continuar."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE

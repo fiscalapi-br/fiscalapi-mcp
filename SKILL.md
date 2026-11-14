@@ -12,10 +12,10 @@ Documentação completa: https://docs.fiscalapi.com.br
 ## Antes de chamar
 
 - Toda consulta abaixo, menos `/api/saldo`, cobra do saldo do usuário. Diga o custo e espere o OK dele antes da primeira chamada e antes de qualquer laço.
-- Preço de 1 consulta por plano (franquia; recarga entre parênteses): Lite R$ 0,67; Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
-- Pela API toda consulta pede plano ou recarga (planos a partir de R$ 19,99/mês). As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br), não valem pela API.
+- Preço de 1 consulta por plano (franquia; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
+- Pela API toda consulta pede plano ou recarga (planos a partir de R$ 50 por mês). As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br), não valem pela API.
 - Consulta que termina em erro não é cobrada. Resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
-- Limite por minuto da conta: Lite 5, Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
+- Limite por minuto da conta: Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
 - Envie só um documento por chamada (`cpf`, `cnpj` ou `ie`), com ou sem pontuação.
 
 ## Endpoints
