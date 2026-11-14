@@ -95,7 +95,7 @@ O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [A
 
 - Toda ferramenta que cobra tem o parâmetro `confirmo_custo`. Sem `confirmo_custo=true`, ela só explica o custo e não consulta nada. O agente deve mostrar o custo e esperar o seu OK.
 - Este servidor aceita até 30 consultas pagas por hora por chave (chave recusada pela API não conta). Para volume, use a API REST direto.
-- Valem também os limites da sua conta: por minuto, Starter 20, Pro 60 e Enterprise 120 consultas; XML de NF-e sem certificado, 2 consultas simultâneas.
+- Valem também os limites da sua conta: por minuto, Starter 20, Pro 60 e Enterprise 120 consultas (conta sem plano: 5); XML de NF-e sem certificado, 2 consultas simultâneas.
 
 ## Segurança
 
