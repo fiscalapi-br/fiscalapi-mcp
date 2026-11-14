@@ -69,7 +69,7 @@ Crie um conector com a URL `https://mcp.fiscalapi.com.br/mcp`, sem autenticaçã
 
 ## Ferramentas
 
-Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
+Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,085); Enterprise R$ 0,025 (R$ 0,035). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 
 | Ferramenta | O que faz | Custo |
 |---|---|---|
