@@ -141,13 +141,19 @@ async def test_chave_ausente_ou_malformada_vira_none(headers):
 async def test_402_vira_mensagem_clara(cliente, api_falsa, headers_do_cliente):
     headers_do_cliente({"X-API-Key": CHAVE})
     api_falsa.status = 402
-    api_falsa.corpo = {"error": "LIMITE_ATINGIDO", "message": "Seu saldo não cobre esta consulta."}
+    api_falsa.corpo = {
+        "error": "LIMITE_ATINGIDO",
+        "message": (
+            "Seu saldo do plano Starter não cobre esta consulta. "
+            "Compre créditos extras no painel ou mude de plano para continuar."
+        ),
+    }
 
     resultado = await cliente.call_tool("consultar_ie_todos_estados", {"cpf": "123.456.789-09", "confirmo_custo": True})
 
     assert resultado.is_error
     mensagem = texto(resultado)
-    assert "Seu saldo não cobre esta consulta" in mensagem
+    assert "Compre créditos extras no painel ou mude de plano" in mensagem
     assert "toda consulta pede plano ou créditos extras" in mensagem
     assert "app.fiscalapi.com.br" in mensagem
     assert CHAVE not in mensagem

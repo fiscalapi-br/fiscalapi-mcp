@@ -519,8 +519,8 @@ async def consultar_nfse(
     title="Saldo da conta",
     description=(
         "Saldo da conta em créditos (1 crédito = R$ 1) e quanto ele ainda rende. creditos traz plano "
-        "(créditos do plano que restam no ciclo), extras (créditos extras, não vencem), guardados (de um "
-        "plano que venceu; só voltam quando a conta assina um plano) e disponivel (plano + extras). "
+        "(créditos do plano que restam no ciclo), extras (créditos extras, não vencem), guardados (créditos "
+        "do plano que sobraram quando o plano venceu; voltam ao assinar um plano) e disponivel (plano + extras). "
         "consultas_restantes (IE, CNPJ, certidões) e notas_restantes (XML de NF-e) dividem o mesmo saldo. "
         "notas_restantes conta o XML com certificado; no Enterprise o XML sem certificado custa o dobro. "
         "Usa a chave da FiscalAPI e não consome consulta."
