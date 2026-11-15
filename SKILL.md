@@ -12,8 +12,8 @@ Documentação completa: https://docs.fiscalapi.com.br
 ## Antes de chamar
 
 - Toda consulta abaixo, menos `/api/saldo`, cobra do saldo do usuário. Diga o custo e espere o OK dele antes da primeira chamada e antes de qualquer laço.
-- Preço de 1 consulta por plano (franquia; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,07); Enterprise R$ 0,025 (R$ 0,02).
-- Pela API toda consulta pede plano ou recarga (planos a partir de R$ 50 por mês). As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br), não valem pela API.
+- O saldo é em créditos (1 crédito = R$ 1); cada consulta desconta o preço dela. Preço de 1 consulta por plano, com os créditos do plano (com créditos extras entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,085); Enterprise R$ 0,025 (R$ 0,035). Os créditos extras só são usados depois que os créditos do plano acabam.
+- Pela API toda consulta pede plano ou créditos extras (planos a partir de R$ 50 por mês). As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br), não valem pela API.
 - Consulta que termina em erro não é cobrada. Resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 - Limite por minuto da conta: Starter 20, Pro 60, Enterprise 120 (sem plano: 5).
 - Envie só um documento por chamada (`cpf`, `cnpj` ou `ie`), com ou sem pontuação.
@@ -24,15 +24,15 @@ Documentação completa: https://docs.fiscalapi.com.br
 |---|---|---|---|
 | `GET /api/consultar` | `uf` + `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições estaduais na UF (por CPF, todas menos SP) | 1 consulta |
 | `GET /api/consultar-ie-todos` | `cpf` ou `cnpj` ou `ie`; `secundarias=true` opcional | Inscrições nos 27 estados, por UF; `complete=false` se algum estado não respondeu | 1 consulta |
-| `GET /api/consultar-cnpj` | `cnpj`; `force_fresh=true` opcional (ao vivo) | Cadastro público na Receita Federal, com Simples e MEI | 1 consulta; ao vivo, 3 |
+| `GET /api/consultar-cnpj` | `cnpj`; `force_fresh=true` opcional (ao vivo) | Cadastro público na Receita Federal, com Simples e MEI | 1 consulta; ao vivo, R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,075 (Enterprise) |
 | `GET /api/consultar-simples-nacional` | `cnpj` | Situação no Simples Nacional, SIMEI e regimes IBS/CBS | 1 consulta |
-| `GET /api/consultar-nfse` | `chave` (50 dígitos); `danfse=true` opcional (PDF em `danfse_pdf_base64`) | NFS-e do padrão nacional, sem certificado; 30 a 60 s | 3 consultas (2 no Enterprise); só a nota entregue |
+| `GET /api/consultar-nfse` | `chave` (50 dígitos); `danfse=true` opcional (PDF em `danfse_pdf_base64`) | NFS-e do padrão nacional, sem certificado; 30 a 60 s | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por nota; só a nota entregue |
 | `GET /api/consultar-cnd` | `uf` + `cpf` ou `cnpj` | CND estadual: status, emissão, validade, PDF em `pdf_base64` | 1 consulta |
 | `GET /api/consultar-cndt` | `cpf` ou `cnpj` | CNDT (débitos trabalhistas) | 1 consulta |
 | `GET /api/consultar-cnd-federal` | `cpf` ou `cnpj`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
 | `GET /api/consultar-crf-fgts` | `cpf` ou `cnpj` | Certificado de Regularidade do FGTS | 1 consulta |
-| `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | 3 consultas (2 no Enterprise); cobra também `nao_encontrado` |
-| `GET /api/saldo` | — | `consultas_restantes` e `notas_restantes` | Não consome |
+| `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave; cobra também `nao_encontrado` |
+| `GET /api/saldo` | — | `consultas_restantes`, `notas_restantes` e `creditos` (`plano`, `extras`, `guardados`, `disponivel`, em créditos) | Não consome |
 
 Status da CND/certidão: `negativa`, `positiva`, `positiva_com_efeitos_de_negativa`, `nao_contribuinte`, `sem_certidao` (não há certidão emitida; não é erro) ou `erro`.
 
@@ -75,7 +75,7 @@ print(cadastro["razao_social"] if cadastro else "sem dado nesta consulta")
 
 Os erros vêm em JSON; o motivo está em `detail` (ou `message`).
 
-- `402`: o saldo não cobre a consulta: a franquia do mês acabou, ou a conta não tem plano nem recarga. O motivo está em `detail`/`message`. Não repita: repasse o motivo e avise o usuário para assinar ou recarregar em app.fiscalapi.com.br.
+- `402`: o saldo em créditos não cobre a consulta: os créditos do plano acabaram e não há créditos extras, ou a conta não tem plano nem créditos extras. O motivo está em `detail`/`message`; o corpo traz também `creditos` (saldo por parte) e `preco` (R$ desta consulta, `plano` e `extras`). Não repita: repasse o motivo e avise o usuário para assinar um plano ou comprar créditos extras em app.fiscalapi.com.br.
 - `403` com `API_KEY_ERROR`: chave ausente, inválida ou revogada. Não tente outra chave por conta própria.
 - `429`: passou do limite por minuto do plano (ou de outro limite descrito em `detail`/`message`, como consultas simultâneas). Espere o tempo de `Retry-After` (ou `retry_after` no corpo) antes de repetir; em lote, espace as chamadas pelo limite do plano.
 - `400`/`422`: parâmetro faltando ou inválido; corrija antes de repetir.
