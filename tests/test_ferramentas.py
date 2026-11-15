@@ -46,7 +46,7 @@ async def test_validar_ie_valida(cliente, api_falsa):
     corpo = dados(resultado)
     assert corpo["valida"] is True
     assert corpo["formatada"] == "110.042.490.114"
-    assert "plano ou recarga" in corpo["proximo_passo"]
+    assert "plano ou créditos extras" in corpo["proximo_passo"]
     assert api_falsa.requisicoes == []
 
 
@@ -148,7 +148,7 @@ async def test_402_vira_mensagem_clara(cliente, api_falsa, headers_do_cliente):
     assert resultado.is_error
     mensagem = texto(resultado)
     assert "Seu saldo não cobre esta consulta" in mensagem
-    assert "toda consulta pede plano ou recarga" in mensagem
+    assert "toda consulta pede plano ou créditos extras" in mensagem
     assert "app.fiscalapi.com.br" in mensagem
     assert CHAVE not in mensagem
 
@@ -242,12 +242,16 @@ async def test_pdf_base64_nao_vai_para_o_modelo(cliente, api_falsa, headers_do_c
 
 async def test_saldo_nao_pede_confirmo_custo(cliente, api_falsa, headers_do_cliente):
     headers_do_cliente({"Authorization": f"bearer {CHAVE}"})
-    api_falsa.corpo = {"consultas_restantes": 1500, "notas_restantes": 500}
+    api_falsa.corpo = {
+        "consultas_restantes": 1500,
+        "notas_restantes": 500,
+        "creditos": {"plano": 97.5, "extras": 0.0, "guardados": 0.0, "disponivel": 97.5},
+    }
 
     resultado = await cliente.call_tool("saldo", {})
 
     assert not resultado.is_error
-    assert dados(resultado) == {"consultas_restantes": 1500, "notas_restantes": 500}
+    assert dados(resultado) == api_falsa.corpo
     [requisicao] = api_falsa.requisicoes
     assert requisicao.url.path == "/api/saldo"
     assert requisicao.headers["x-api-key"] == CHAVE

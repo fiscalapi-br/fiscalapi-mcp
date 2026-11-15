@@ -6,7 +6,7 @@ Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi
 
 Duas ferramentas funcionam sem chave e não cobram nada: `validar_inscricao_estadual` e `cobertura`. As outras usam a sua chave da FiscalAPI e cobram do saldo da conta, como a API REST.
 
-Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) e tenha plano ou recarga (planos a partir de R$ 50 por mês).
+Para consultar dados reais: crie a chave em [app.fiscalapi.com.br](https://app.fiscalapi.com.br) e tenha plano ou créditos extras (planos a partir de R$ 50 por mês).
 
 ## Configurar
 
@@ -69,7 +69,7 @@ Crie um conector com a URL `https://mcp.fiscalapi.com.br/mcp`, sem autenticaçã
 
 ## Ferramentas
 
-Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,085); Enterprise R$ 0,025 (R$ 0,035). Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
+O saldo da conta é em créditos (1 crédito = R$ 1), e cada consulta desconta o preço dela. Preço de 1 consulta por plano, com os créditos do plano (com créditos extras entre parênteses): Starter R$ 0,10 (R$ 0,12); Pro R$ 0,065 (R$ 0,085); Enterprise R$ 0,025 (R$ 0,035). Como funcionam os créditos: https://fiscalapi.com.br/creditos/ . Consulta que termina em erro não é cobrada; resposta sem inscrição encontrada, `sem_certidao` ou `nao_contribuinte` conta como consulta.
 
 | Ferramenta | O que faz | Custo |
 |---|---|---|
@@ -77,17 +77,17 @@ Preço de 1 consulta do saldo por plano (franquia do plano; recarga entre parên
 | `cobertura` | O que a FiscalAPI consulta, por produto e UF, e os limites da API. | Sem chave, sem custo |
 | `consultar_ie` | Inscrição Estadual numa UF, por CPF, CNPJ ou IE (por CPF, todos os estados menos SP). | 1 consulta |
 | `consultar_ie_todos_estados` | Inscrições nos 27 estados numa chamada, por CPF, CNPJ ou IE. | 1 consulta |
-| `consultar_cnpj` | Cadastro público do CNPJ na Receita Federal, com Simples e MEI. `ao_vivo=true` consulta na hora. | 1 consulta; ao vivo, 3 |
+| `consultar_cnpj` | Cadastro público do CNPJ na Receita Federal, com Simples e MEI. `ao_vivo=true` consulta na hora. | 1 consulta; ao vivo, R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,075 (Enterprise) |
 | `consultar_simples_nacional` | Situação do CNPJ no Simples Nacional, SIMEI e regimes IBS/CBS. | 1 consulta |
-| `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | 3 consultas (2 no Enterprise); mínimo R$ 0,05; só a nota entregue |
+| `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por nota; só a nota entregue |
 | `consultar_cnd_estadual` | CND estadual (ICMS) de CPF ou CNPJ na UF. | 1 consulta |
 | `consultar_cndt` | Certidão Negativa de Débitos Trabalhistas. | 1 consulta |
 | `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União. | 1 consulta |
 | `consultar_crf_fgts` | Certificado de Regularidade do FGTS. | 1 consulta |
-| `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | 3 consultas (2 no Enterprise); mínimo R$ 0,05 |
-| `saldo` | Quanto o saldo ainda rende, em consultas e em notas. | Não consome consulta |
+| `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave |
+| `saldo` | Saldo em créditos (do plano, extras, guardados e disponível) e quanto ele ainda rende, em consultas e em notas. | Não consome consulta |
 
-Pelo MCP toda consulta pede plano ou recarga, a partir de R$ 50 por mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
+Pelo MCP toda consulta pede plano ou créditos extras, a partir de R$ 50 por mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
 
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 

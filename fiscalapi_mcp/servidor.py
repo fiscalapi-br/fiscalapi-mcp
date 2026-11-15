@@ -363,7 +363,7 @@ async def consultar_cnpj(
     ctx: Context,
     cnpj: Annotated[str, Field(description="CNPJ, com ou sem pontuação.", max_length=24)],
     ao_vivo: Annotated[
-        bool, Field(description="Consulta a Receita Federal na hora, ignorando o cache. Custa 3 consultas.")
+        bool, Field(description="Consulta a Receita Federal na hora, ignorando o cache. Tem preço próprio (ver Custo).")
     ] = False,
     confirmo_custo: CampoConfirmo = False,
 ) -> dict[str, Any]:
@@ -518,9 +518,12 @@ async def consultar_nfse(
 @mcp.tool(
     title="Saldo da conta",
     description=(
-        "Quanto o saldo da conta ainda rende: consultas_restantes (IE, CNPJ, certidões) e notas_restantes "
-        "(XML de NF-e). As duas formas dividem o mesmo saldo. notas_restantes conta o XML com certificado; "
-        "no Enterprise o XML sem certificado gasta o dobro. Usa a chave da FiscalAPI e não consome consulta."
+        "Saldo da conta em créditos (1 crédito = R$ 1) e quanto ele ainda rende. creditos traz plano "
+        "(créditos do plano que restam no ciclo), extras (créditos extras, não vencem), guardados (de um "
+        "plano que venceu; só voltam quando a conta assina um plano) e disponivel (plano + extras). "
+        "consultas_restantes (IE, CNPJ, certidões) e notas_restantes (XML de NF-e) dividem o mesmo saldo. "
+        "notas_restantes conta o XML com certificado; no Enterprise o XML sem certificado custa o dobro. "
+        "Usa a chave da FiscalAPI e não consome consulta."
     ),
 )
 async def saldo(ctx: Context) -> dict[str, Any]:
