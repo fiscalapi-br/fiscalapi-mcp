@@ -168,8 +168,8 @@ COBERTURA = {
 # consulta, ou conta sem plano nem créditos). Vazio, fica só o geral.
 MSG_402 = (
     "A FiscalAPI não liberou esta consulta pelo saldo da conta{motivo}. Pelo MCP e pela API, toda consulta pede "
-    "plano ou créditos extras (planos a partir de R$ 50 por mês). Assine um plano ou compre créditos extras em "
-    "app.fiscalapi.com.br para continuar."
+    "plano ou créditos extras (planos a partir de R$ 50 por mês). Assine um plano em app.fiscalapi.com.br; "
+    "quem já tem plano pode comprar créditos extras lá."
 )
 MSG_CHAVE_RECUSADA = "A FiscalAPI recusou a chave: ausente, inválida ou revogada. " + COMO_CONFIGURAR_CHAVE
 MSG_5XX = (
