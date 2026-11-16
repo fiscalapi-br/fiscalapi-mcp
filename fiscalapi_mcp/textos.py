@@ -158,7 +158,7 @@ COBERTURA = {
         "o_que_devolve": "Conferência do formato e do dígito verificador da IE nas 27 UFs, e este resumo.",
     },
     "fora_deste_servidor": (
-        "As demais consultas da API (CND de todos os estados de uma vez, XML de NF-e com certificado, "
+        "As demais consultas da API (CND de todos os estados de uma vez, XML de NF-e e de CT-e com certificado, "
         "consulta em massa e outras) estão na API REST: https://docs.fiscalapi.com.br"
     ),
     "limites": LIMITES_DA_API,

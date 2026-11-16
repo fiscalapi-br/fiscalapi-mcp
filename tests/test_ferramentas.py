@@ -70,6 +70,14 @@ async def test_cobertura_nao_chama_a_api(cliente, api_falsa):
     assert api_falsa.requisicoes == []
 
 
+async def test_cobertura_manda_xml_de_cte_para_a_api_rest(cliente, api_falsa):
+    resultado = await cliente.call_tool("cobertura", {})
+
+    corpo = dados(resultado)
+    assert "CT-e com certificado" in corpo["fora_deste_servidor"]
+    assert api_falsa.requisicoes == []
+
+
 async def test_paga_sem_confirmo_custo_nao_chama_a_api(cliente, api_falsa, headers_do_cliente):
     headers_do_cliente({"X-API-Key": CHAVE})
 
