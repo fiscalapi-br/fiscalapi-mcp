@@ -89,6 +89,8 @@ O saldo da conta é em créditos (1 crédito = R$ 1), e cada consulta desconta o
 
 Pelo MCP toda consulta pede plano ou créditos extras, a partir de R$ 50 por mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
 
+O XML de NF-e e de CT-e com certificado e o DIFAL de saída não existem no MCP: o certificado e a senha passariam pelo contexto do modelo. Use a [API REST](https://docs.fiscalapi.com.br) ou o painel.
+
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 
 ### Freios
