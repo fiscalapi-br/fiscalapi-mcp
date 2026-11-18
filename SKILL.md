@@ -29,7 +29,7 @@ Documentação completa: https://docs.fiscalapi.com.br
 | `GET /api/consultar-nfse` | `chave` (50 dígitos); `danfse=true` opcional (PDF em `danfse_pdf_base64`) | NFS-e do padrão nacional, sem certificado; 30 a 60 s | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por nota; só a nota entregue |
 | `GET /api/consultar-cnd` | `uf` + `cpf` ou `cnpj` | CND estadual: status, emissão, validade, PDF em `pdf_base64` | 1 consulta |
 | `GET /api/consultar-cndt` | `cpf` ou `cnpj` | CNDT (débitos trabalhistas) | 1 consulta |
-| `GET /api/consultar-cnd-federal` | `cpf` ou `cnpj`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
+| `GET /api/consultar-cnd-federal` | `cnpj`, ou `cpf` com `data_nascimento`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
 | `GET /api/consultar-crf-fgts` | `cpf` ou `cnpj` | Certificado de Regularidade do FGTS | 1 consulta |
 | `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave; cobra também `nao_encontrado` |
 | `GET /api/saldo` | — | `consultas_restantes`, `notas_restantes` e `creditos` (`plano`, `extras`, `guardados`, `disponivel`, em créditos) | Não consome |
