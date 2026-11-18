@@ -415,7 +415,8 @@ async def consultar_cndt(
     title="Consultar CND Federal",
     description=(
         "Consulta a certidão de débitos de tributos federais e Dívida Ativa da União (Receita Federal e PGFN) "
-        "de um CPF ou CNPJ (um só). Se já existe certidão que vale por mais de 3 dias, devolve essa "
+        "de um CPF ou CNPJ (um só). Para CPF, a Receita exige a data de nascimento do titular "
+        "(data_nascimento). Se já existe certidão que vale por mais de 3 dias, devolve essa "
         "(modo=consulta); senão, emite uma nova (modo=emissao). Com emitir_nova=true, emite sempre. Devolve "
         "status, emissão, validade e protocolo. O PDF não vem pelo MCP. " + textos.CUSTO_CONSULTA_GRATIS
     ),
@@ -424,10 +425,22 @@ async def consultar_cnd_federal(
     ctx: Context,
     cpf: CampoCPF = None,
     cnpj: CampoCNPJ = None,
+    data_nascimento: Annotated[
+        str | None,
+        Field(
+            description="Data de nascimento do titular, obrigatória para CPF (DD/MM/AAAA ou AAAA-MM-DD).",
+            max_length=10,
+        ),
+    ] = None,
     emitir_nova: Annotated[bool, Field(description="Emite uma certidão nova mesmo que já exista uma válida.")] = False,
     confirmo_custo: CampoConfirmo = False,
 ) -> dict[str, Any]:
     params: dict[str, Any] = dict(_um_documento(cpf=cpf, cnpj=cnpj))
+    if "cpf" in params:
+        nascimento = (data_nascimento or "").strip()
+        if not nascimento:
+            raise ToolError("Informe data_nascimento: a CND Federal de CPF exige a data de nascimento do titular.")
+        params["data_nascimento"] = nascimento
     if emitir_nova:
         params["emitir_nova"] = "true"
     return await _consulta_paga(

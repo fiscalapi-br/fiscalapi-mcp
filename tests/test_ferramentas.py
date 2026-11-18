@@ -364,3 +364,39 @@ async def test_nfse_chave_com_tamanho_errado_nao_chama_a_api(cliente, api_falsa,
     assert resultado.is_error
     assert "50 dígitos" in texto(resultado)
     assert api_falsa.requisicoes == []
+
+
+async def test_cnd_federal_cpf_manda_data_de_nascimento(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+
+    resultado = await cliente.call_tool(
+        "consultar_cnd_federal",
+        {"cpf": "123.456.789-09", "data_nascimento": "12/04/1985", "confirmo_custo": True},
+    )
+
+    assert not resultado.is_error
+    [requisicao] = api_falsa.requisicoes
+    assert requisicao.url.path == "/api/consultar-cnd-federal"
+    assert dict(requisicao.url.params) == {"cpf": "12345678909", "data_nascimento": "12/04/1985"}
+
+
+async def test_cnd_federal_cpf_sem_data_nao_chama_a_api(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+
+    resultado = await cliente.call_tool("consultar_cnd_federal", {"cpf": "12345678909", "confirmo_custo": True})
+
+    assert resultado.is_error
+    assert api_falsa.requisicoes == []
+
+
+async def test_cnd_federal_cnpj_ignora_data_de_nascimento(cliente, api_falsa, headers_do_cliente):
+    headers_do_cliente({"X-API-Key": CHAVE})
+
+    resultado = await cliente.call_tool(
+        "consultar_cnd_federal",
+        {"cnpj": "11222333000181", "data_nascimento": "12/04/1985", "confirmo_custo": True},
+    )
+
+    assert not resultado.is_error
+    [requisicao] = api_falsa.requisicoes
+    assert dict(requisicao.url.params) == {"cnpj": "11222333000181"}

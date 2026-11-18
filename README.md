@@ -82,7 +82,7 @@ O saldo da conta é em créditos (1 crédito = R$ 1), e cada consulta desconta o
 | `consultar_nfse` | NFS-e do padrão nacional pela chave de 50 dígitos, sem certificado. O PDF do DANFSe fica na API REST. | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por nota; só a nota entregue |
 | `consultar_cnd_estadual` | CND estadual (ICMS) de CPF ou CNPJ na UF. | 1 consulta |
 | `consultar_cndt` | Certidão Negativa de Débitos Trabalhistas. | 1 consulta |
-| `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União. | 1 consulta |
+| `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União (CPF exige `data_nascimento`). | 1 consulta |
 | `consultar_crf_fgts` | Certificado de Regularidade do FGTS. | 1 consulta |
 | `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave |
 | `saldo` | Saldo em créditos (do plano, extras, guardados e disponível) e quanto ele ainda rende, em consultas e em notas. | Não consome consulta |
