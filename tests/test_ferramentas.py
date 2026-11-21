@@ -18,6 +18,12 @@ PAGAS = {
     "consultar_cnd_federal",
     "consultar_crf_fgts",
     "baixar_xml_nfe_sem_certificado",
+    "monitorar_chaves_nfe",
+}
+MONITOR_SEM_CUSTO = {
+    "listar_chaves_monitoradas_nfe",
+    "consultar_chave_monitorada_nfe",
+    "remover_chaves_monitoradas_nfe",
 }
 SEM_CHAVE = {"validar_inscricao_estadual", "cobertura"}
 CHAVE = "fapi_chave_de_teste_123"
@@ -27,7 +33,7 @@ async def test_tools_list_tem_todas_as_ferramentas(cliente):
     resultado = await cliente.list_tools()
     por_nome = {ferramenta.name: ferramenta for ferramenta in resultado.tools}
 
-    assert set(por_nome) == PAGAS | SEM_CHAVE | {"saldo"}
+    assert set(por_nome) == PAGAS | SEM_CHAVE | MONITOR_SEM_CUSTO | {"saldo"}
     for nome in SEM_CHAVE:
         assert por_nome[nome].annotations is not None
         assert por_nome[nome].annotations.read_only_hint is True

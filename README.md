@@ -1,6 +1,6 @@
 # FiscalAPI MCP
 
-Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, Simples Nacional, NFS-e por chave, CND estadual, CNDT, CND Federal, CRF/FGTS e baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital), usando a sua conta da FiscalAPI.
+Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, Simples Nacional, NFS-e por chave, CND estadual, CNDT, CND Federal, CRF/FGTS, baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital) e colocar chaves de NF-e no Monitor de NF-e, usando a sua conta da FiscalAPI.
 
 **Endereço:** `https://mcp.fiscalapi.com.br/mcp` (Streamable HTTP)
 
@@ -85,11 +85,17 @@ O saldo da conta é em créditos (1 crédito = R$ 1), e cada consulta desconta o
 | `consultar_cnd_federal` | Certidão de tributos federais e Dívida Ativa da União (CPF exige `data_nascimento`). | 1 consulta |
 | `consultar_crf_fgts` | Certificado de Regularidade do FGTS. | 1 consulta |
 | `baixar_xml_nfe_sem_certificado` | Cópia para leitura do XML de uma NF-e (modelo 55) pela chave de acesso, sem a assinatura digital. | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave |
+| `monitorar_chaves_nfe` | Coloca até 1.000 chaves de NF-e no Monitor: a FiscalAPI acompanha cada nota na SEFAZ por até 180 dias e avisa no webhook da conta quando ela é cancelada, denegada ou recebe um evento. | R$ 0,03 (Starter), R$ 0,02 (Pro) ou R$ 0,015 (Enterprise) por chave aceita, uma vez; chave já monitorada ou inválida não cobra |
+| `listar_chaves_monitoradas_nfe` | Chaves do monitor com situação, fim previsto, próxima verificação e avisos que falharam (paginada por cursor). | Não cobra |
+| `consultar_chave_monitorada_nfe` | Situação, eventos registrados e próxima verificação de uma chave do monitor. | Não cobra |
+| `remover_chaves_monitoradas_nfe` | Para de monitorar as chaves (sem estorno; monitorar de novo cobra outra vez). | Não cobra |
 | `saldo` | Saldo em créditos (do plano, extras, guardados e disponível) e quanto ele ainda rende, em consultas e em notas. | Não consome consulta |
 
 Pelo MCP toda consulta pede plano ou créditos extras, a partir de R$ 50 por mês. As 10 consultas grátis do mês são só no painel (app.fiscalapi.com.br). O XML de NF-e sem certificado cobra também a chave cuja nota não foi encontrada (menos a mesma chave repetida logo depois).
 
 O XML de NF-e e de CT-e com certificado e o DIFAL de saída não existem no MCP: o certificado e a senha passariam pelo contexto do modelo. Use a [API REST](https://docs.fiscalapi.com.br) ou o painel.
+
+O webhook do Monitor de NF-e (URL e segredo da assinatura) também fica fora do MCP: o segredo passaria pelo contexto do modelo. Cadastre pela API REST (`PUT /api/monitor-nfe/webhook`); sem webhook, o monitor funciona e o agente acompanha pela listagem.
 
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.
 

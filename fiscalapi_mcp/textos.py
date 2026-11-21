@@ -49,6 +49,13 @@ CUSTO_NFSE = (
     f"entregue; chave inválida, nota não encontrada e erro não são cobrados. {_GRATIS}"
 )
 
+_PRECO_MONITOR = "Starter R$ 0,03; Pro R$ 0,02; Enterprise R$ 0,015 (mesmo preço com créditos extras)"
+CUSTO_MONITOR = (
+    f"Custo por chave aceita, {_DO_SALDO}: {_PRECO_MONITOR}, uma vez, cobrindo todo o acompanhamento. "
+    "Chave já monitorada pela conta e chave inválida não são cobradas. Sem saldo para todas as aceitas, "
+    "nenhuma entra. Precisa de plano ou créditos extras."
+)
+
 LIMITES_DA_API = (
     "Limite por minuto da conta: Starter 20, Pro 60, Enterprise 120 consultas "
     "(conta sem plano: 5). XML de NF-e sem certificado: até 2 consultas simultâneas por conta."
@@ -153,14 +160,32 @@ COBERTURA = {
             "assinatura. O XML assinado sai na consulta com certificado, no painel ou na API REST."
         ),
     },
+    "monitor_nfe": {
+        "ferramentas": [
+            "monitorar_chaves_nfe",
+            "listar_chaves_monitoradas_nfe",
+            "consultar_chave_monitorada_nfe",
+            "remover_chaves_monitoradas_nfe",
+        ],
+        "ufs": list(UFS),
+        "o_que_devolve": (
+            "Acompanha cada NF-e (modelo 55) na SEFAZ por até 180 dias e avisa no webhook da conta quando a "
+            "nota é cancelada, denegada ou recebe um evento (carta de correção, por exemplo). Sem certificado. "
+            "A listagem e a consulta por chave mostram a situação atual, os eventos e a próxima verificação."
+        ),
+        "observacoes": [
+            "O webhook (URL e segredo da assinatura) é cadastrado pela API REST: PUT /api/monitor-nfe/webhook.",
+            "Chave com mais de 180 dias da emissão é recusada sem cobrança.",
+        ],
+    },
     "sem_chave": {
         "ferramentas": ["validar_inscricao_estadual", "cobertura"],
         "o_que_devolve": "Conferência do formato e do dígito verificador da IE nas 27 UFs, e este resumo.",
     },
     "fora_deste_servidor": (
         "As demais consultas da API (CND de todos os estados de uma vez, XML de NF-e e de CT-e com certificado, "
-        "DIFAL de saída por UF de destino com o certificado do emitente, consulta em massa e outras) estão na "
-        "API REST: https://docs.fiscalapi.com.br"
+        "DIFAL de saída por UF de destino com o certificado do emitente, cadastro do webhook do monitor de NF-e, "
+        "consulta em massa e outras) estão na API REST: https://docs.fiscalapi.com.br"
     ),
     "limites": LIMITES_DA_API,
 }
