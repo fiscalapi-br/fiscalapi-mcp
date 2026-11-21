@@ -2,7 +2,9 @@
 
 A URL base é fixa e os caminhos são constantes deste módulo: o que vem do
 cliente MCP entra só como parâmetro de query ou campo do corpo JSON, nunca no
-caminho nem no host. A chave vai SÓ no header X-API-Key e nunca é logada.
+host. A única exceção no caminho é a chave de NF-e do monitor (`{chave_nfe}`),
+aceita só com exatamente 44 dígitos. A chave da API vai SÓ no header X-API-Key
+e nunca é logada.
 """
 
 import logging
@@ -36,7 +38,13 @@ CAMINHOS = {
     "consultar_nfse": ("GET", "/api/consultar-nfse"),
     "baixar_xml_nfe_sem_certificado": ("POST", "/api/consultar-nfe-xml-sem-certificado"),
     "saldo": ("GET", "/api/saldo"),
+    "monitorar_chaves_nfe": ("POST", "/api/monitor-nfe/chaves"),
+    "listar_chaves_monitoradas_nfe": ("GET", "/api/monitor-nfe/chaves"),
+    "consultar_chave_monitorada_nfe": ("GET", "/api/monitor-nfe/chaves/{chave_nfe}"),
+    "remover_chaves_monitoradas_nfe": ("POST", "/api/monitor-nfe/chaves/remover"),
 }
+
+_CHAVE_NFE = re.compile(r"[0-9]{44}")
 
 
 class ErroDaAPI(Exception):
@@ -59,8 +67,15 @@ class ClienteFiscalAPI:
         chave: str,
         params: dict[str, Any] | None = None,
         corpo: dict[str, Any] | None = None,
+        chave_nfe: str | None = None,
     ) -> dict[str, Any]:
         metodo, caminho = CAMINHOS[operacao]
+        if "{chave_nfe}" in caminho:
+            if chave_nfe is None or not _CHAVE_NFE.fullmatch(chave_nfe):
+                raise ErroDaAPI("A chave de acesso da NF-e tem 44 dígitos. Confira e tente de novo.")
+            caminho = caminho.replace("{chave_nfe}", chave_nfe)
+        elif chave_nfe is not None:
+            raise ValueError("operação sem chave no caminho")
         headers = {"X-API-Key": chave, "User-Agent": USER_AGENT, "Accept": "application/json"}
         try:
             async with httpx.AsyncClient(
@@ -135,6 +150,9 @@ def _mensagem_de_erro(resposta: httpx.Response) -> str:
         quando = f" Espere {espera} s e tente de novo." if espera else " Espere um pouco e tente de novo."
         motivo = detalhe or "limite de consultas por minuto do plano"
         return f"A FiscalAPI limitou as chamadas desta conta ({motivo})." + quando
+    if status == 404:
+        motivo = f": {detalhe}" if detalhe else "."
+        return f"A FiscalAPI não encontrou o que foi pedido{motivo}"
     if status in (400, 422):
         motivo = f": {detalhe}" if detalhe else "."
         return f"A FiscalAPI recusou os parâmetros{motivo} Corrija e tente de novo."

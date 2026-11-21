@@ -89,7 +89,10 @@ INSTRUCOES = (
     "validar_inscricao_estadual e cobertura não precisam de chave nem cobram. As demais usam a chave da "
     "FiscalAPI do usuário (header X-API-Key ou Authorization: Bearer) e as de consulta cobram do saldo dele: "
     "antes de chamá-las, diga ao usuário o custo que está na descrição da ferramenta e só passe "
-    "confirmo_custo=true depois que ele aceitar. " + textos.CHAMADA_PARA_CHAVE + "."
+    "confirmo_custo=true depois que ele aceitar. O monitor de NF-e (monitorar_chaves_nfe) acompanha notas "
+    "na SEFAZ e avisa no webhook da conta; listar, consultar e remover chaves do monitor não cobram. "
+    + textos.CHAMADA_PARA_CHAVE
+    + "."
 )
 
 mcp = MCPServer(
@@ -242,12 +245,18 @@ async def _consulta_paga(
 
 
 async def _chamar_api(
-    operacao: str, chave: str, params: dict[str, Any] | None = None, corpo: dict[str, Any] | None = None
+    operacao: str,
+    chave: str,
+    params: dict[str, Any] | None = None,
+    corpo: dict[str, Any] | None = None,
+    chave_nfe: str | None = None,
 ) -> dict[str, Any]:
     if LIMITE_COM_CHAVE.tentar("global"):
         raise ToolError("Muitas chamadas neste servidor agora. Tente de novo em 1 minuto.")
     logger.info("ferramenta=%s", operacao)
     try:
+        if chave_nfe is not None:
+            return await cliente_api.chamar(operacao, chave, params=params, corpo=corpo, chave_nfe=chave_nfe)
         return await cliente_api.chamar(operacao, chave, params=params, corpo=corpo)
     except ErroDaAPI as erro:
         raise ToolError(str(erro)) from erro
@@ -541,6 +550,151 @@ async def consultar_nfse(
 )
 async def saldo(ctx: Context) -> dict[str, Any]:
     return await _chamar_api("saldo", _chave_ou_erro(ctx))
+
+
+# --- monitor de NF-e -------------------------------------------------------
+
+MAX_CHAVES_MONITOR = 1000
+MAX_ITENS_LISTAGEM = 200
+
+StatusMonitor = Literal[
+    "autorizada",
+    "autorizada_fora_prazo",
+    "denegada",
+    "cancelada",
+    "cancelada_fora_prazo",
+    "nao_encontrada",
+    "chave_divergente",
+]
+
+CampoChavesMonitor = Annotated[
+    list[Annotated[str, Field(max_length=60)]],
+    Field(
+        description="Chaves de acesso de NF-e (44 dígitos cada; separadores são ignorados), de 1 a 1.000.",
+        min_length=1,
+        max_length=MAX_CHAVES_MONITOR,
+    ),
+]
+
+
+def _chave_nfe(chave: str) -> str:
+    """44 dígitos, sem separador nem o prefixo "NFe"; senão ToolError."""
+    digitos = "".join(c for c in chave if c in "0123456789")
+    if len(digitos) != 44:
+        raise ToolError("Cada chave de acesso da NF-e tem 44 dígitos. Confira e tente de novo.")
+    return digitos
+
+
+def _chaves_nfe(chaves: list[str]) -> list[str]:
+    if not chaves:
+        raise ToolError("Informe ao menos uma chave de acesso.")
+    if len(chaves) > MAX_CHAVES_MONITOR:
+        raise ToolError(f"Envie no máximo {MAX_CHAVES_MONITOR} chaves por chamada.")
+    return [_chave_nfe(c) for c in chaves]
+
+
+@mcp.tool(
+    title="Monitorar chaves de NF-e",
+    description=(
+        "Coloca chaves de NF-e (modelo 55) no monitor da conta: a FiscalAPI acompanha cada nota na SEFAZ "
+        "por até 180 dias (prazo_dias, padrão 180) e avisa no webhook da conta quando ela é cancelada, "
+        "denegada ou recebe um evento (carta de correção, por exemplo). Sem certificado. O webhook é "
+        "cadastrado pela API REST (PUT /api/monitor-nfe/webhook); sem ele, acompanhe pela listagem. "
+        "Devolve, por chave, aceita, ja_monitorada ou invalida (com motivo), as aceitas e o valor cobrado. "
+        + textos.CUSTO_MONITOR
+    ),
+)
+async def monitorar_chaves_nfe(
+    ctx: Context,
+    chaves: CampoChavesMonitor,
+    prazo_dias: Annotated[
+        int | None, Field(description="Dias de monitoramento, de 1 a 180 (padrão: 180).", ge=1, le=180)
+    ] = None,
+    status_conhecido: Annotated[
+        StatusMonitor | None,
+        Field(description="Situação que o usuário já conhece (padrão: autorizada). O 1º aviso só sai se mudar."),
+    ] = None,
+    confirmo_custo: CampoConfirmo = False,
+) -> dict[str, Any]:
+    itens: list[dict[str, Any]] = []
+    for chave_nfe in _chaves_nfe(chaves):
+        item: dict[str, Any] = {"chave": chave_nfe}
+        if status_conhecido:
+            item["status_conhecido"] = status_conhecido
+        itens.append(item)
+    corpo: dict[str, Any] = {"chaves": itens}
+    if prazo_dias is not None:
+        corpo["prazo_dias"] = prazo_dias
+    return await _consulta_paga(ctx, "monitorar_chaves_nfe", textos.CUSTO_MONITOR, confirmo_custo, corpo=corpo)
+
+
+@mcp.tool(
+    title="Listar chaves monitoradas de NF-e",
+    description=(
+        "Lista as chaves do monitor de NF-e da conta, do menos ao mais recentemente alterado: situação, "
+        "se o monitoramento está ativo, fim previsto, próxima verificação e avisos que o webhook não "
+        "recebeu (entregas_falhas). Passe proximo_cursor em cursor para a próxima página. Com "
+        "alterado_desde, só o que mudou desde então (pode repetir itens). Usa a chave da FiscalAPI e não cobra."
+    ),
+    annotations=ToolAnnotations(read_only_hint=True, open_world_hint=False),
+)
+async def listar_chaves_monitoradas_nfe(
+    ctx: Context,
+    status: Annotated[StatusMonitor | None, Field(description="Só notas nesta situação.")] = None,
+    ativo: Annotated[
+        bool | None, Field(description="true: só monitoramentos correndo; false: só os encerrados.")
+    ] = None,
+    alterado_desde: Annotated[
+        str | None,
+        Field(description="ISO 8601, ex.: 2026-11-21T00:00:00-03:00 (sem fuso: horário de Brasília).", max_length=40),
+    ] = None,
+    cursor: Annotated[str | None, Field(description="proximo_cursor da página anterior.", max_length=200)] = None,
+    limite: Annotated[int, Field(description="Itens por página, de 1 a 200.", ge=1, le=MAX_ITENS_LISTAGEM)] = 50,
+) -> dict[str, Any]:
+    chave = _chave_ou_erro(ctx)
+    params: dict[str, Any] = {"limite": limite}
+    if status:
+        params["status"] = status
+    if ativo is not None:
+        params["ativo"] = "true" if ativo else "false"
+    if alterado_desde and alterado_desde.strip():
+        params["alterado_desde"] = alterado_desde.strip()
+    if cursor and cursor.strip():
+        params["cursor"] = cursor.strip()
+    return await _chamar_api("listar_chaves_monitoradas_nfe", chave, params=params)
+
+
+@mcp.tool(
+    title="Consultar uma chave monitorada de NF-e",
+    description=(
+        "Situação atual de uma NF-e do monitor da conta, os eventos registrados na nota (cancelamento, "
+        "carta de correção...), a próxima verificação, o fim do monitoramento e os avisos que o webhook não "
+        "recebeu. Usa a chave da FiscalAPI e não cobra."
+    ),
+    annotations=ToolAnnotations(read_only_hint=True, open_world_hint=False),
+)
+async def consultar_chave_monitorada_nfe(
+    ctx: Context,
+    chave: Annotated[
+        str, Field(description="Chave de acesso da NF-e (44 dígitos); separadores são ignorados.", max_length=60)
+    ],
+) -> dict[str, Any]:
+    chave_api = _chave_ou_erro(ctx)
+    return await _chamar_api("consultar_chave_monitorada_nfe", chave_api, chave_nfe=_chave_nfe(chave))
+
+
+@mcp.tool(
+    title="Parar de monitorar chaves de NF-e",
+    description=(
+        "Encerra o monitoramento das chaves informadas. Não há estorno, não sai aviso no webhook e "
+        "monitorar a mesma chave de novo cobra outra vez: confirme com o usuário antes. Devolve quantas "
+        "foram removidas e as que não estavam no monitor. Usa a chave da FiscalAPI e não cobra."
+    ),
+    annotations=ToolAnnotations(destructive_hint=True, open_world_hint=False),
+)
+async def remover_chaves_monitoradas_nfe(ctx: Context, chaves: CampoChavesMonitor) -> dict[str, Any]:
+    chave = _chave_ou_erro(ctx)
+    return await _chamar_api("remover_chaves_monitoradas_nfe", chave, corpo={"chaves": _chaves_nfe(chaves)})
 
 
 # --- rotas HTTP fora do MCP ------------------------------------------------

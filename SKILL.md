@@ -1,6 +1,6 @@
 ---
 name: fiscalapi
-description: Use para consultar dados fiscais brasileiros pela API REST da FiscalAPI (api.fiscalapi.com.br) — Inscrição Estadual nos 27 estados por CPF, CNPJ ou IE, cadastro de CNPJ, Simples Nacional, NFS-e pela chave, CND estadual, CNDT, CND Federal, CRF/FGTS, XML de NF-e pela chave de acesso e saldo da conta. Cada consulta cobra do saldo do usuário; confirme o custo antes.
+description: Use para consultar dados fiscais brasileiros pela API REST da FiscalAPI (api.fiscalapi.com.br) — Inscrição Estadual nos 27 estados por CPF, CNPJ ou IE, cadastro de CNPJ, Simples Nacional, NFS-e pela chave, CND estadual, CNDT, CND Federal, CRF/FGTS, XML de NF-e pela chave de acesso, Monitor de NF-e por chave (aviso por webhook) e saldo da conta. Cada consulta cobra do saldo do usuário; confirme o custo antes.
 ---
 
 # FiscalAPI pela API REST
@@ -32,9 +32,16 @@ Documentação completa: https://docs.fiscalapi.com.br
 | `GET /api/consultar-cnd-federal` | `cnpj`, ou `cpf` com `data_nascimento`; `emitir_nova=true` opcional | Certidão de tributos federais e Dívida Ativa da União | 1 consulta |
 | `GET /api/consultar-crf-fgts` | `cpf` ou `cnpj` | Certificado de Regularidade do FGTS | 1 consulta |
 | `POST /api/consultar-nfe-xml-sem-certificado` | corpo JSON só com `{"chave": "<44 posições>"}` (campo a mais dá 422) | Cópia para leitura do XML de uma NF-e (modelo 55), sem a assinatura digital (`assinado=false`, `tipo_xml=leitura`) | R$ 0,30 (Starter), R$ 0,195 (Pro) ou R$ 0,05 (Enterprise) por chave; cobra também `nao_encontrado` |
+| `POST /api/monitor-nfe/chaves` | corpo `{"chaves": [{"chave": "<44 dígitos>", "status_conhecido": "autorizada"}], "prazo_dias": 180}` (até 1.000 chaves; `status_conhecido` e `prazo_dias` opcionais) | Por chave: `aceita`, `ja_monitorada` ou `invalida` (com `motivo`); `aceitas` e `valor_cobrado`. Sem saldo para todas: 402 e nenhuma entra | R$ 0,03 (Starter), R$ 0,02 (Pro) ou R$ 0,015 (Enterprise) por chave aceita, uma vez |
+| `GET /api/monitor-nfe/chaves` | `status`, `ativo`, `alterado_desde`, `cursor`, `limite` (≤ 1.000) opcionais | Chaves do monitor e `proximo_cursor` | Não cobra |
+| `GET /api/monitor-nfe/chaves/{chave}` | — | Situação, eventos, próxima verificação e avisos que o webhook não recebeu | Não cobra |
+| `POST /api/monitor-nfe/chaves/remover` | corpo `{"chaves": ["<44 dígitos>"]}` | `removidas` e `nao_encontradas` (sem estorno) | Não cobra |
+| `PUT /api/monitor-nfe/webhook` | corpo `{"url": "https://..."}` (só https, porta 443, nome público) | `segredo` da assinatura, mostrado só aqui: o usuário guarda, nunca o repita na resposta | Não cobra |
 | `GET /api/saldo` | — | `consultas_restantes`, `notas_restantes` e `creditos` (`plano`, `extras`, `guardados`, `disponivel`, em créditos) | Não consome |
 
 Status da CND/certidão: `negativa`, `positiva`, `positiva_com_efeitos_de_negativa`, `nao_contribuinte`, `sem_certidao` (não há certidão emitida; não é erro) ou `erro`.
+
+Monitor de NF-e: os avisos chegam por POST JSON no webhook da conta (tipos `nfe.status_alterado`, `nfe.evento_registrado`, `nfe.monitoramento_encerrado`, `teste`). Para conferir que veio da FiscalAPI: `X-FiscalAPI-Assinatura` = `v1=` + HMAC-SHA256 em hex, com o segredo inteiro `whsec_...` como chave, sobre `"{X-FiscalAPI-Timestamp}." + corpo_bruto`; aceite se alguma `v1=` bater (na troca de segredo vêm duas), compare em tempo constante, recuse timestamp com mais de 5 min de diferença e deduplique pelo `id`. Os SDKs oficiais (Python, Node.js, PHP) já trazem a verificação.
 
 ## Exemplos (documentos fictícios)
 
