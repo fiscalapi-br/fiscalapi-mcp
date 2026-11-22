@@ -95,6 +95,8 @@ Pelo MCP toda consulta pede plano ou créditos extras, a partir de R$ 50 por mê
 
 O XML de NF-e e de CT-e com certificado e o DIFAL de saída não existem no MCP: o certificado e a senha passariam pelo contexto do modelo. Use a [API REST](https://docs.fiscalapi.com.br) ou o painel.
 
+A emissão de NFS-e Nacional também não existe no MCP, pelo mesmo motivo: a nota é assinada com o certificado A1 da empresa, que não pode passar pelo modelo. Emita pela [API REST](https://docs.fiscalapi.com.br/docs/emissao-nfse/visao-geral) ou pelos SDKs ([Python](https://github.com/fiscalapi-br/fiscalapi-python), [Node.js](https://github.com/fiscalapi-br/fiscalapi-node), [PHP](https://github.com/fiscalapi-br/fiscalapi-php)). A ferramenta `cobertura` explica isso ao agente.
+
 O webhook do Monitor de NF-e (URL e segredo da assinatura) também fica fora do MCP: o segredo passaria pelo contexto do modelo. Cadastre pela API REST (`PUT /api/monitor-nfe/webhook`); sem webhook, o monitor funciona e o agente acompanha pela listagem.
 
 O PDF das certidões não volta pelo MCP (é grande demais para o modelo). Na [API REST](https://docs.fiscalapi.com.br) ele vem no campo `pdf_base64`; repetir a consulta lá cobra de novo.

@@ -91,8 +91,8 @@ INSTRUCOES = (
     "antes de chamá-las, diga ao usuário o custo que está na descrição da ferramenta e só passe "
     "confirmo_custo=true depois que ele aceitar. O monitor de NF-e (monitorar_chaves_nfe) acompanha notas "
     "na SEFAZ e avisa no webhook da conta; listar, consultar e remover chaves do monitor não cobram. "
-    + textos.CHAMADA_PARA_CHAVE
-    + "."
+    "A emissão de NFS-e da FiscalAPI não existe neste servidor (o certificado A1 não pode passar pelo "
+    "modelo): para emitir, indique a API REST ou os SDKs. " + textos.CHAMADA_PARA_CHAVE + "."
 )
 
 mcp = MCPServer(
@@ -301,8 +301,9 @@ async def validar_inscricao_estadual(
 @mcp.tool(
     title="O que a FiscalAPI consulta",
     description=(
-        "Resumo do que a FiscalAPI consulta por produto e UF, o que cada ferramenta devolve e os limites "
-        "da API. Não precisa de chave e não cobra."
+        "Resumo do que a FiscalAPI consulta por produto e UF, o que cada ferramenta devolve, os limites "
+        "da API e o que fica só na API REST, como a emissão de NFS-e e as consultas com certificado. "
+        "Não precisa de chave e não cobra."
     ),
     annotations=_SOMENTE_LEITURA,
 )
