@@ -178,14 +178,30 @@ COBERTURA = {
             "Chave com mais de 180 dias da emissão é recusada sem cobrança.",
         ],
     },
+    "emissao_nfse": {
+        "ferramentas": [],
+        "onde": "API REST (https://docs.fiscalapi.com.br/docs/emissao-nfse/visao-geral) e SDKs oficiais",
+        "o_que_faz": (
+            "Emite a NFS-e do padrão nacional pela empresa do cliente, assinada com o certificado A1 dela: "
+            "cadastro de empresas e do certificado, emissão, consulta, cancelamento, substituição, XML, DANFSe "
+            "e aviso por webhook assinado. Homologação grátis (1.000 notas por mês); em produção, cobra só a "
+            "nota autorizada (Starter R$ 0,15, Pro R$ 0,10, Enterprise R$ 0,07)."
+        ),
+        "observacoes": [
+            "Não há ferramenta de emissão neste servidor: o certificado A1 e a senha passariam pelo contexto "
+            "do modelo. Emita pela API REST ou pelos SDKs (Python, Node.js, PHP) e pelo node do n8n.",
+            "A consulta de NFS-e emitida por terceiros, pela chave de acesso, é a ferramenta consultar_nfse.",
+        ],
+    },
     "sem_chave": {
         "ferramentas": ["validar_inscricao_estadual", "cobertura"],
         "o_que_devolve": "Conferência do formato e do dígito verificador da IE nas 27 UFs, e este resumo.",
     },
     "fora_deste_servidor": (
         "As demais consultas da API (CND de todos os estados de uma vez, XML de NF-e e de CT-e com certificado, "
-        "DIFAL de saída por UF de destino com o certificado do emitente, cadastro do webhook do monitor de NF-e, "
-        "consulta em massa e outras) estão na API REST: https://docs.fiscalapi.com.br"
+        "DIFAL de saída por UF de destino com o certificado do emitente, emissão de NFS-e com o certificado A1 "
+        "da empresa, cadastro do webhook do monitor de NF-e, consulta em massa e outras) estão na API REST: "
+        "https://docs.fiscalapi.com.br"
     ),
     "limites": LIMITES_DA_API,
 }

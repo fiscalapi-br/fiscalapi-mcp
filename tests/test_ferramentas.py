@@ -92,6 +92,22 @@ async def test_cobertura_manda_difal_de_saida_para_a_api_rest(cliente, api_falsa
     assert api_falsa.requisicoes == []
 
 
+async def test_cobertura_manda_emissao_de_nfse_para_a_api_rest(cliente, api_falsa):
+    resultado = await cliente.call_tool("cobertura", {})
+
+    corpo = dados(resultado)
+    assert corpo["emissao_nfse"]["ferramentas"] == []
+    assert "certificado A1" in corpo["emissao_nfse"]["observacoes"][0]
+    assert "emissão de NFS-e" in corpo["fora_deste_servidor"]
+    assert api_falsa.requisicoes == []
+
+
+async def test_nenhuma_ferramenta_emite_nfse(cliente):
+    nomes = {f.name for f in (await cliente.list_tools()).tools}
+
+    assert not any("emit" in nome for nome in nomes)
+
+
 async def test_paga_sem_confirmo_custo_nao_chama_a_api(cliente, api_falsa, headers_do_cliente):
     headers_do_cliente({"X-API-Key": CHAVE})
 
