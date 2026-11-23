@@ -1,6 +1,6 @@
 # FiscalAPI MCP
 
-Servidor MCP para consultar inscrição estadual (SINTEGRA) nos 27 estados, CNPJ na Receita Federal e certidões (CND estadual, CND Federal, CNDT, CRF/FGTS) dentro do Claude, do Cursor, do VS Code e do ChatGPT. É o servidor [MCP](https://modelcontextprotocol.io) oficial da [FiscalAPI](https://fiscalapi.com.br).
+Servidor MCP para consultar inscrição estadual (SINTEGRA) nos 27 estados, CNPJ na Receita Federal e certidões (CND estadual, CND Federal, CNDT, CRF/FGTS) dentro do Claude, do Cursor e do VS Code. No ChatGPT, o conector valida inscrição estadual e mostra a cobertura por estado. É o servidor [MCP](https://modelcontextprotocol.io) oficial da [FiscalAPI](https://fiscalapi.com.br).
 
 Também consulta Simples Nacional e NFS-e pela chave, baixa uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital) e coloca chaves de NF-e no Monitor de NF-e, usando a sua conta da FiscalAPI.
 
