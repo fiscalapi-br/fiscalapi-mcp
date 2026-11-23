@@ -1,8 +1,12 @@
 # FiscalAPI MCP
 
-Servidor [MCP](https://modelcontextprotocol.io) da [FiscalAPI](https://fiscalapi.com.br). Deixa um agente de IA (Claude, Cursor, VS Code, ChatGPT) consultar Inscrição Estadual nos 27 estados, CNPJ, Simples Nacional, NFS-e por chave, CND estadual, CNDT, CND Federal, CRF/FGTS, baixar uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital) e colocar chaves de NF-e no Monitor de NF-e, usando a sua conta da FiscalAPI.
+Servidor MCP para consultar inscrição estadual (SINTEGRA) nos 27 estados, CNPJ na Receita Federal e certidões (CND estadual, CND Federal, CNDT, CRF/FGTS) dentro do Claude, do Cursor e do VS Code. No ChatGPT, o conector valida inscrição estadual e mostra a cobertura por estado. É o servidor [MCP](https://modelcontextprotocol.io) oficial da [FiscalAPI](https://fiscalapi.com.br).
 
-**Endereço:** `https://mcp.fiscalapi.com.br/mcp` (Streamable HTTP)
+Também consulta Simples Nacional e NFS-e pela chave, baixa uma cópia para leitura do XML de NF-e pela chave de acesso (sem a assinatura digital) e coloca chaves de NF-e no Monitor de NF-e, usando a sua conta da FiscalAPI.
+
+**Endereço:** `https://mcp.fiscalapi.com.br/mcp` (Streamable HTTP). No registro oficial de servidores MCP: `io.github.fiscalapi-br/fiscalapi-mcp`.
+
+**Documentação:** [docs.fiscalapi.com.br/docs/getting-started/mcp](https://docs.fiscalapi.com.br/docs/getting-started/mcp)
 
 Duas ferramentas funcionam sem chave e não cobram nada: `validar_inscricao_estadual` e `cobertura`. As outras usam a sua chave da FiscalAPI e cobram do saldo da conta, como a API REST.
 
